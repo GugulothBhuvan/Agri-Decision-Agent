@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ s['ops.title'] }}</h1>
+{% if not configured %}<p class="bad">{{ s['ops.not_configured'] }}</p>{% else %}
+<form method="post" action="/ops/login" class="card">
+  <div class="field"><label for="pc">{{ s['ops.passcode'] }}</label><input id="pc" name="passcode" type="password" autocomplete="current-password" required></div>
+  {% if failed %}<p class="bad">{{ s['ops.wrong'] }}</p>{% endif %}
+  <button class="btn primary" type="submit">{{ s['ops.enter'] }}</button>
+</form>{% endif %}
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block bodyattrs %}data-page="farm"{% endblock %}
+{% macro miss(key) %}{% if key in missing %}<span class="missing">{{ s['farm.missing'] }}</span>{% endif %}{% endmacro %}
+{% block content %}
+<h1>{{ s['farm.title'] }}</h1>
+{% if not farm %}<p class="muted">{{ s['farm.empty'] }}</p>{% endif %}
+{% set f = farm or {} %}
+<form class="card" id="farm-form" autocomplete="off">
+  <div class="field"><label for="f-name">{{ s['farm.name'] }}</label><input id="f-name" name="name" value="{{ f.name or '' }}"></div>
+  <div class="field"><label for="f-village">{{ s['farm.village'] }}</label><input id="f-village" name="village" value="{{ f.village or '' }}">
+    {{ miss('village') }}
+    {% if f.place_name %}<span class="second">{{ s['farm.place'] }}: {{ f.place_name }}</span>{% elif f.village %}<span class="missing">{{ s['farm.not_found'] }}</span>{% endif %}</div>
+  <div class="field"><label for="f-district">{{ s['farm.district'] }}</label><input id="f-district" name="district" value="{{ f.district or '' }}"></div>
+  <div class="field"><label for="f-crop">{{ s['farm.crop'] }}</label>
+    <select id="f-crop" name="crop"><option value="">{{ s['farm.unknown'] }}</option>
+      {% for c in ['paddy_aman', 'potato'] %}<option value="{{ c }}" {% if f.crop == c %}selected{% endif %}>{{ s['farm.crop.' ~ c] }}</option>{% endfor %}
+    </select>{{ miss('crop') }}</div>
+  <div class="field"><label for="f-area">{{ s['farm.area'] }}</label><input id="f-area" name="area_bigha" type="number" step="0.1" min="0" inputmode="decimal" value="{{ f.area_bigha if f.area_bigha is not none else '' }}">{{ miss('area_bigha') }}</div>
+  <div class="field"><label for="f-stage">{{ s['farm.stage'] }}</label>
+    <select id="f-stage" name="stage"><option value="">{{ s['farm.unknown'] }}</option>
+      {% for st in ['growing', 'ready', 'cut', 'sold', 'to_sow'] %}<option value="{{ st }}" {% if f.stage == st %}selected{% endif %}>{{ s['farm.stage.' ~ st] }}</option>{% endfor %}
+    </select>{{ miss('stage') }}</div>
+  <div class="field"><label for="f-cut">{{ s['farm.cut_date'] }}</label><input id="f-cut" name="cut_date" type="date" value="{{ f.cut_date or '' }}">{{ miss('cut_date') }}</div>
+  <div class="field"><label>{{ s['farm.insured'] }}</label>
+    <div class="seg">
+      <label><input type="radio" name="insured" value="true" {% if f.insured == true %}checked{% endif %}> {{ s['farm.yes'] }}</label>
+      <label><input type="radio" name="insured" value="false" {% if f.insured == false %}checked{% endif %}> {{ s['farm.no'] }}</label>
+    </div>{{ miss('insured') }}</div>
+  {% if f.village and not f.place_name %}
+  <details class="field"><summary>{{ s['farm.pin'] }}</summary>
+    <div class="row"><input name="lat" type="number" step="0.0001" placeholder="{{ s['card.lat'] }}" aria-label="{{ s['card.lat'] }}" style="flex:1">
+    <input name="lon" type="number" step="0.0001" placeholder="{{ s['card.lon'] }}" aria-label="{{ s['card.lon'] }}" style="flex:1"></div></details>
+  {% endif %}
+  <div class="row"><button class="btn primary" type="submit">{{ s['farm.save'] }}</button><span class="toast" id="farm-saved" hidden>{{ s['farm.saved'] }}</span></div>
+</form>
+<section class="card">
+  <div class="field"><label>{{ s['farm.language'] }}</label>
+    <div class="seg">
+      <label><input type="radio" name="language" value="bn" {% if lang == 'bn' %}checked{% endif %}> বাংলা</label>
+      <label><input type="radio" name="language" value="en" {% if lang == 'en' %}checked{% endif %}> English</label>
+    </div></div>
+  <div class="field"><label>{{ s['farm.theme'] }}</label>
+    <div class="seg" id="theme-seg">
+      {% for th in ['system', 'light', 'dark'] %}<label><input type="radio" name="theme" value="{{ th }}"> {{ s['farm.theme.' ~ th] }}</label>{% endfor %}
+    </div></div>
+</section>
+{% if farm %}
+<section class="card"><button class="btn danger" id="delete-farm" type="button" data-confirm="{{ s['farm.delete_confirm'] }}">{{ s['farm.delete'] }}</button></section>
+{% endif %}
+{% endblock %}
+{% block dock %}{% with page='farm', show_type=false %}{% include "_dock.html" %}{% endwith %}{% endblock %}

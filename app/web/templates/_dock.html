@@ -1,0 +1,25 @@
+<div class="dock">
+  <div class="in">
+    <div class="mic-row">
+      <button class="mic" id="mic" type="button" data-state="idle" aria-label="{{ s['mic.idle'] }}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+      </button>
+      <div class="mic-label" aria-live="polite">
+        <strong id="mic-text">{{ s['mic.idle'] }}</strong>
+        <span class="second" id="mic-text-2">{{ s2['mic.idle'] }}</span>
+        <span class="timer" id="mic-timer"></span>
+      </div>
+    </div>
+    {% if show_type %}
+    <form class="type-row" id="type-form" autocomplete="off">
+      <input id="type-input" name="text" maxlength="1000" placeholder="{{ s['talk.placeholder'] }}" aria-label="{{ s['talk.placeholder'] }}">
+      <button class="btn primary" type="submit">{{ s['talk.send'] }}</button>
+    </form>
+    {% endif %}
+    <nav class="nav" aria-label="main">
+      <a href="/" {% if page == 'home' %}aria-current="page"{% endif %}>{{ s['nav.home'] }}</a>
+      <a href="/talk" {% if page == 'talk' %}aria-current="page"{% endif %}>{{ s['nav.talk'] }}</a>
+      <a href="/farm" {% if page == 'farm' %}aria-current="page"{% endif %}>{{ s['nav.farm'] }}</a>
+    </nav>
+  </div>
+</div>

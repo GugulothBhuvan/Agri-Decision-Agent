@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block topwide %}wide{% endblock %}
+{% block mainwide %}wide{% endblock %}
+{% block bodyattrs %}data-page="ops"{% endblock %}
+{% block content %}
+<div class="row spread"><h1>{{ s['ops.title'] }}</h1>
+  <form method="post" action="/ops/logout"><button class="btn" type="submit">Log out</button></form></div>
+<div class="grid2">
+<div>
+  <section class="card">
+    <h2>Farms ({{ o.farms|length }})</h2>
+    {% if not o.farms %}<p class="muted">{{ s['ops.no_farms'] }}</p>{% else %}
+    <div class="scroll-x"><table>
+      <tr><th>Village</th><th>Crop</th><th>Stage</th><th>Bigha</th><th>Cut</th><th>Insured</th><th>Loc</th></tr>
+      {% for f in o.farms %}<tr><td>{{ f.village or '—' }}</td><td>{{ f.crop or '—' }}</td><td>{{ f.stage or '—' }}</td>
+        <td>{{ f.area_bigha if f.area_bigha is not none else '—' }}</td><td>{{ f.cut_date or '—' }}</td>
+        <td>{{ {True: 'yes', False: 'no'}.get(f.insured, '—') }}</td>
+        <td class="mono">{% if f.lat is not none %}{{ '%.2f'|format(f.lat) }},{{ '%.2f'|format(f.lon) }}{% else %}<span class="bad">none</span>{% endif %}</td></tr>{% endfor %}
+    </table></div>{% endif %}
+  </section>
+  <section class="card">
+    <h2>Decision log</h2>
+    <p class="small muted">{{ o.stats.with_source }} of {{ o.stats.decisions }} decisions carry a source and fetch time.</p>
+    <div class="scroll-x"><table>
+      <tr><th>#</th><th>Module</th><th>Tier</th><th>Outcome</th><th>Changed</th><th>Delivered</th><th>Source</th><th>When</th></tr>
+      {% for d in o.decisions %}<tr>
+        <td><a href="/why/{{ d.id }}">{{ d.id }}</a></td><td>{{ d.module }}<br><span class="muted small">{{ d.origin }}</span></td>
+        <td><span class="chip {{ d.tier }}">{{ d.tier }}</span></td><td class="small">{{ d.action }}</td>
+        <td>{{ 'yes' if d.changed else 'no' }}</td><td>{{ 'yes' if d.delivered else ('blocked' if d.blocked else 'no') }}</td>
+        <td class="small">{% if d.source %}<a href="{{ d.source_url }}" target="_blank" rel="noopener">{{ d.source }}</a><br><span class="mono">{{ d.fetched_at }}{% if d.cached %} · cached{% endif %}</span>{% else %}<span class="bad">{{ d.blocked or 'none' }}</span>{% endif %}</td>
+        <td class="mono">{{ d.created_at }}</td></tr>{% endfor %}
+    </table></div>
+  </section>
+  <section class="card">
+    <h2>Last traces</h2>
+    <div class="scroll-x"><table>
+      <tr><th>Run</th><th>Node</th><th>Summary</th><th>ms</th></tr>
+      {% for t in o.traces %}<tr><td class="mono small">{{ t.run_id }}</td><td>{{ t.graph[:4] }}·{{ t.node }}</td>
+        <td class="small">{{ t.summary }}{% if t.error %}<br><span class="bad">{{ t.error }}</span>{% endif %}</td><td class="mono">{{ t.ms }}</td></tr>{% endfor %}
+    </table></div>
+  </section>
+</div>
+<div>
+  <section class="card">
+    <h2>Controls</h2>
+    <button class="btn primary block" id="run-now" type="button">Run now</button>
+    <pre class="small mono" id="run-result" hidden></pre>
+    <h3 style="margin-top:16px">Source-outage switch</h3>
+    {% for h in o.health %}
+    <div class="switch"><span>{{ h.name }}{% if not h.configured %} <span class="bad small">(no key)</span>{% endif %}</span>
+      <label class="row"><input type="checkbox" class="src-toggle" data-source="{{ h.source }}" {% if h.enabled %}checked{% endif %}> on</label></div>
+    {% endfor %}
+  </section>
+  <section class="card">
+    <h2>Source health</h2>
+    <ul class="plain">{% for h in o.health %}{% if h.source in ['openmeteo', 'nominatim'] %}
+      <li><strong>{{ h.name }}</strong> — {% if h.last %}<span class="{{ 'ok' if h.last_ok else 'bad' }}">{{ 'ok' if h.last_ok else 'failed' }}</span> <span class="mono">{{ h.last }}</span>{% else %}<span class="muted">no calls yet</span>{% endif %}
+        {% if h.last_error %}<br><span class="small bad">{{ h.last_error }}</span>{% endif %}
+        {% if h.last_success %}<br><span class="small muted">last success {{ h.last_success }}</span>{% endif %}</li>
+    {% endif %}{% endfor %}</ul>
+    <p class="small">Voice turn p90: <span class="stat">{{ (o.stats.turn_p90_ms / 1000) | round(1) if o.stats.turn_p90_ms else '—' }}</span> s</p>
+  </section>
+  <section class="card">
+    <h2>Errors</h2>
+    {% if not o.errors %}<p class="muted">None.</p>{% endif %}
+    <ul class="plain">{% for e in o.errors %}<li class="small"><span class="mono">{{ e.at }}</span> {{ e.where }}<br><span class="bad">{{ e.error }}</span></li>{% endfor %}</ul>
+  </section>
+</div>
+</div>
+{% endblock %}

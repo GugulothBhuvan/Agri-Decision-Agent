@@ -1,0 +1,37 @@
+# Every threshold carries its source. Values marked `team` are our design
+# choices and are stated as such in "Why this?".
+rain_categories_mm_24h:          # IMD terminology
+  light: [2.5, 15.5]
+  moderate: [15.6, 64.4]
+  heavy: [64.5, 115.5]
+  source: "IMD Hyderabad forecast bulletin terminology"
+  url: "https://mausam.imd.gov.in/hyderabad/mcdata/tsfcst.pdf"
+
+harvest:
+  dry_day_max_rain_mm: 2.5         # below IMD 'light rain'
+  dry_day_max_prob_pct: 40         # team
+  consecutive_dry_days: 2          # team: cut day plus one day in the field
+  horizon_days: 5
+
+cpc_quality:
+  max_moisture_pct: 17
+  max_damaged_sprouted_pct: 5
+  source: "WB Food & Supplies procurement FAQ"
+  url: "https://food.wb.gov.in/food/HomePage/Procurement.aspx"
+
+calamity:
+  protect_red_next24h_mm: 64.5     # IMD heavy
+  protect_amber_next24h_mm: 15.6   # IMD moderate, only when stage is cut
+  claim_trigger_past24h_mm: 64.5   # team, using IMD heavy as the bar
+  post_harvest_window_days: 14
+  report_within_hours: 72
+  source: "Bangla Shasya Bima prospectus, SBI General"
+  url: "https://content.sbigeneral.in/uploads/Bangla_Shasya_Bima_Prospectus_254049b6c4.pdf"
+
+blight_jhulsacast_wb:               # P1
+  rule_5day: {rh_pct: 90, rh_hours: 65, temp_c: [7.2, 26.6], temp_hours: 105, rain_2day_mm: 2.5, consecutive_days: 5}
+  rule_7day: {rh_pct: 90, rh_hours: 105, temp_c: [7.2, 26.6], temp_hours: 150, consecutive_days: 7}
+  source: "Chakraborty et al., Potato Journal 42(1)"
+  url: "https://epubs.icar.org.in/index.php/PotatoJ/article/view/47731"
+
+freshness_hours: 6

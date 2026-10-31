@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block bodyattrs %}data-page="claim" data-claim="{{ c.id }}"{% endblock %}
+{% block content %}
+<h1>{{ s['claim.title'] }}</h1>
+<section class="card decision" data-tier="red">
+  {% if c.closed and not c.sent %}
+    <p class="countdown closed">{{ s['claim.closed'] }}</p>
+  {% else %}
+    <div class="countdown" data-deadline="{{ c.deadline_at }}" data-closed-text="{{ s['claim.closed'] }}">--:--</div>
+    <p class="small muted">{{ s['claim.left'] }}</p>
+  {% endif %}
+  <p class="mono">{{ s['claim.deadline'].format(time=c.deadline_label) }}</p>
+  <p class="small">{{ s['claim.event'].format(time=c.event_label, mm=c.rain_mm) }}</p>
+</section>
+<section class="card">
+  <h2>{{ s['claim.checklist'] }}</h2>
+  {% for i in c.checklist %}
+  <label class="check"><input type="checkbox" data-key="{{ i.key }}" {% if i.done %}checked{% endif %}>
+    <span>{{ i.label }}<span class="second">{{ i.label_2 }}</span></span></label>
+  {% endfor %}
+</section>
+<section class="card">
+  <h2>{{ s['claim.message'] }}</h2>
+  <div class="report" id="report">{{ c.report_text }}</div>
+  <div class="links"><button class="btn primary" id="copy-report" type="button" data-done="{{ s['claim.copied'] }}">{{ s['claim.copy'] }}</button></div>
+  <p class="small">{{ s['claim.insurer'] }}</p>
+</section>
+<section class="card">
+  {% if c.sent %}
+    <p class="toast">{{ s['claim.marked_sent'].format(time=c.sent_label) }}</p>
+    <button class="btn" id="mark-sent" data-sent="false" type="button">{{ s['claim.unsend'] }}</button>
+  {% else %}
+    <button class="btn primary block" id="mark-sent" data-sent="true" type="button">{{ s['claim.sent'] }}</button>
+  {% endif %}
+  <p class="small muted">{{ s['claim.rule'].format(hours=c.hours) }} <a href="{{ c.rule_url }}" target="_blank" rel="noopener">{{ c.rule_source }}</a></p>
+  {% if c.decision_id %}<a href="/why/{{ c.decision_id }}">{{ s['card.why'] }}</a>{% endif %}
+</section>
+{% endblock %}

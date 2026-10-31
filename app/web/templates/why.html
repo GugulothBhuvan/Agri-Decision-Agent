@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block bodyattrs %}data-page="why"{% endblock %}
+{% block content %}
+<h1>{{ s['why.title'] }}</h1>
+<section class="card decision" data-tier="{{ d.tier }}">
+  <div class="row spread"><span class="chip {{ d.tier }}">{{ tier_label }}</span><span class="mono muted">{{ when }}</span></div>
+  <p>{{ reason }}</p>
+  {% if d.cached %}<p class="small muted">{{ s['why.cached_note'] }}</p>{% endif %}
+</section>
+<section class="card">
+  <h2>{{ s['why.inputs'] }}</h2>
+  <ul class="plain">
+  {% for src in d.sources %}
+    <li><strong>{{ src.name }}</strong> — {{ s['why.forecast_what'] }}<br>
+      <span class="mono">{% if src.cached %}{{ s['source.cached'].format(time=src.time) }}{% else %}{{ s['source.fetched'].format(time=src.time) }}{% endif %}</span><br>
+      <a class="small" href="{{ src.url }}" rel="noopener" target="_blank">{{ src.url[:60] }}…</a></li>
+  {% else %}
+    <li class="bad">{{ d.blocked_reason or 'No source' }}</li>
+  {% endfor %}
+  </ul>
+  {% if d.module == 'claim' %}<p class="small muted">{{ s['why.estimated'] }}</p>{% endif %}
+</section>
+{% if days %}
+<section class="card">
+  <h2>{{ s['why.days'] }}</h2>
+  <div class="scroll-x"><table>
+    <tr><th></th><th>{{ s['why.rain'] }}</th><th>{{ s['why.chance'] }}</th><th></th></tr>
+    {% for x in days %}<tr><td>{{ x.label }}</td><td class="mono">{{ x.rain_mm }}</td><td class="mono">{{ x.prob_max_pct }}%</td>
+      <td>{% if x.dry %}<span class="chip green">{{ s['why.dry'] }}</span>{% else %}<span class="chip amber">{{ s['why.wet'] }}</span>{% endif %}</td></tr>{% endfor %}
+  </table></div>
+</section>
+{% endif %}
+<section class="card">
+  <h2>{{ s['why.rules'] }}</h2>
+  <ul class="plain">
+  {% for r in d.rule_sources %}
+    <li>{% if r.url %}<a href="{{ r.url }}" rel="noopener" target="_blank">{{ r.name }}</a>{% else %}<strong>{{ s['why.team'] }}</strong>{% endif %} — {{ (r.what_bn if lang == 'bn' and r.what_bn else r.what) }}</li>
+  {% endfor %}
+  </ul>
+</section>
+<a class="btn" href="/">{{ s['back'] }}</a>
+{% endblock %}

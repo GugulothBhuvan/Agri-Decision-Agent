@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block bodyattrs %}data-page="talk"{% endblock %}
+{% block content %}
+{% if not speech %}<p class="bubble system">{{ s['talk.voice_off'] }}</p>{% endif %}
+<div class="chat" id="chat" aria-live="polite">
+  {% if not messages %}<div class="bubble system">{{ s['home.empty'] }}</div>{% endif %}
+  {% for m in messages %}
+  <div class="bubble {{ m.role }}">{{ m.text }}{% if m.role == 'sathi' and m.decision_ids %}<br><a href="/why/{{ m.decision_ids[0] }}">{{ s['card.why'] }}</a>{% endif %}</div>
+  {% endfor %}
+</div>
+{% endblock %}
+{% block dock %}{% with page='talk', show_type=true %}{% include "_dock.html" %}{% endwith %}{% endblock %}

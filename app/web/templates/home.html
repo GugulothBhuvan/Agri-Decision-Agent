@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block farmname %}{{ farm_line }}{% endblock %}
+{% block bodyattrs %}data-page="home"{% endblock %}
+{% block content %}
+<div id="card-area">
+{% if not farm or not farm.village %}
+  <section class="card placeholder">
+    <p>{{ s['home.empty'] }}<span class="second">{{ s2['home.empty'] }}</span></p>
+  </section>
+{% else %}
+  {% if claim and not claim.closed %}
+  <section class="card decision" data-tier="red">
+    <div class="row spread"><span class="chip red">{{ s['tier.red'] }}</span><span class="mono">{{ s['home.claim_open'] }}</span></div>
+    <div class="countdown" data-deadline="{{ claim.deadline_at }}" data-closed-text="{{ s['claim.closed'] }}">--:--</div>
+    <div class="links"><a class="btn primary" href="/claim/{{ claim.claim_id }}">{{ s['home.open_claim'] }}</a></div>
+  </section>
+  {% endif %}
+  {% if card %}
+  <section class="card decision" data-tier="{{ card.tier }}" data-decision="{{ card.id }}">
+    <div class="row spread">
+      <span class="chip {{ card.tier }}">{{ card.tier_label }} · {{ card.tier_label_2 }}</span>
+      {% if card.cached %}<span class="chip cached">{{ s['source.cached'].format(time=card.updated) }}</span>{% endif %}
+    </div>
+    <p class="action">{{ card.action }}</p>
+    <span class="second">{{ card.action_2 }}</span>
+    <p>{{ card.reason }}</p>
+    <div class="row spread">
+      <a href="/why/{{ card.id }}">{{ s['card.why'] }}</a>
+      <span class="mono muted">{{ s['card.updated'].format(time=card.updated) }}</span>
+    </div>
+  </section>
+  {% elif missing %}
+  <section class="card placeholder"><p>{{ s['home.finish_profile'] }}<span class="second">{{ s2['home.finish_profile'] }}</span></p></section>
+  {% else %}
+  <section class="card placeholder"><p>{{ s['home.no_decision'] }}<span class="second">{{ s2['home.no_decision'] }}</span></p></section>
+  {% endif %}
+{% endif %}
+</div>
+
+<section class="reply-box" id="reply-box" hidden>
+  <div class="bubble farmer" id="reply-q" hidden></div>
+  <div class="chat"><div class="bubble sathi" id="reply-a"></div></div>
+</section>
+
+{% if farm and farm.village %}
+<section class="card">
+  <h2>{{ s['home.inbox'] }}</h2>
+  {% if alerts %}
+  <ul class="plain">
+    {% for a in alerts %}
+    <li><div class="row spread"><span class="chip {{ a.tier }}">{{ s['tier.' ~ a.tier] }}</span><span class="mono muted">{{ a.time }}</span></div>
+      <p>{{ a.text }}</p>{% if a.decision_id %}<a href="/why/{{ a.decision_id }}">{{ s['card.why'] }}</a>{% endif %}</li>
+    {% endfor %}
+  </ul>
+  {% else %}<p class="muted">{{ s['home.inbox_empty'] }}</p>{% endif %}
+</section>
+{% endif %}
+{% endblock %}
+{% block dock %}{% with page='home', show_type=false %}{% include "_dock.html" %}{% endwith %}{% endblock %}

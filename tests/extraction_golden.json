@@ -1,0 +1,22 @@
+[
+  {"text": "আমার নাম গোপাল মাহাতো, শালবনি গ্রাম, পশ্চিম মেদিনীপুর। ৩ বিঘা আমন ধান, পেকে গেছে।", "expect": {"village": "Salboni", "district": "Paschim Medinipur", "crop": "paddy_aman", "area_bigha": 3, "stage": "ready"}},
+  {"text": "ধান কেটে ফেলেছি গতকাল, দুই বিঘা জমি, বিমা আছে।", "expect": {"crop": "paddy_aman", "area_bigha": 2, "stage": "cut", "cut_days_ago": 1, "insured": true}},
+  {"text": "I farm 5 bigha of paddy in Keshpur, it is ripe now.", "expect": {"village": "Keshpur", "crop": "paddy_aman", "area_bigha": 5, "stage": "ready"}},
+  {"text": "আলু বুনব, এখনও বোনা হয়নি, ২ বিঘা।", "expect": {"crop": "potato", "area_bigha": 2, "stage": "to_sow"}},
+  {"text": "ধান এখনও সবুজ, বাড়ছে।", "expect": {"crop": "paddy_aman", "stage": "growing"}},
+  {"text": "Garbeta village, Paschim Medinipur district. Paddy already cut 3 days ago.", "expect": {"village": "Garbeta", "district": "Paschim Medinipur", "crop": "paddy_aman", "stage": "cut", "cut_days_ago": 3}},
+  {"text": "আমার শস্য বিমা নেই।", "expect": {"insured": false}},
+  {"text": "দেড় বিঘা ধান, কাটার সময় হয়ে গেছে।", "expect": {"crop": "paddy_aman", "area_bigha": 1.5, "stage": "ready"}},
+  {"text": "আজ সকালে ধান কেটেছি।", "expect": {"crop": "paddy_aman", "stage": "cut", "cut_days_ago": 0}},
+  {"text": "We have Bangla Shasya Bima insurance for our aman paddy.", "expect": {"crop": "paddy_aman", "insured": true}},
+  {"text": "দাঁতন ব্লকের মনোহরপুর গ্রামে আমার ৪ বিঘা জমি।", "expect": {"village": "Manoharpur", "area_bigha": 4}},
+  {"text": "ধান বিক্রি হয়ে গেছে।", "expect": {"crop": "paddy_aman", "stage": "sold"}},
+  {"text": "1 acre of paddy, ripe.", "expect": {"crop": "paddy_aman", "area_bigha": 3, "stage": "ready"}},
+  {"text": "আমি পূজা, বাবার হয়ে বলছি। জমি চন্দ্রকোণায়, ৬ বিঘা ধান পেকেছে।", "expect": {"village": "Chandrakona", "crop": "paddy_aman", "area_bigha": 6, "stage": "ready"}},
+  {"text": "পাঁচ দিন আগে ধান কেটেছি, মাঠে পড়ে আছে।", "expect": {"crop": "paddy_aman", "stage": "cut", "cut_days_ago": 5}},
+  {"text": "আলুর জমি তিন বিঘা, গাছ বাড়ছে।", "expect": {"crop": "potato", "area_bigha": 3, "stage": "growing"}},
+  {"text": "Village Sabang, district Paschim Medinipur.", "expect": {"village": "Sabang", "district": "Paschim Medinipur"}},
+  {"text": "হ্যাঁ, বিমা করা আছে।", "expect": {"insured": true}},
+  {"text": "ধান পাকতে আরও এক সপ্তাহ লাগবে।", "expect": {"crop": "paddy_aman", "stage": "growing"}},
+  {"text": "কাল ধান কেটেছি, ২ বিঘা, বিমা নেই।", "expect": {"crop": "paddy_aman", "area_bigha": 2, "stage": "cut", "cut_days_ago": 1, "insured": false}}
+]
