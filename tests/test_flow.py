@@ -201,3 +201,16 @@ def test_heavy_rain_opens_red_alert_and_claim_kit(saved_forecast, geocoder, monk
         # Next run: same event, no second kit.
         run2 = asyncio.run(monitor_graph.run(now=now))
         assert not [d for d in run2["delivered"] if d["module"] == "claim"]
+
+
+def test_manual_location_pin_completes_profile(saved_forecast, monkeypatch):
+    from app.agent import tools
+
+    async def miss(v, d=None):
+        return None
+    monkeypatch.setattr(tools, "nominatim_lookup", miss)
+    c = client()
+    with c:
+        r = c.patch("/api/farm", json={"village": "Kovur", "crop": "paddy_aman", "stage": "cut", "area_bigha": 2,
+                                       "cut_date": "2026-10-30", "insured": True, "lat": 14.49, "lon": 79.98}).json()
+        assert r["missing"] == [] and r["profile"]["profile_confirmed"] and r["profile"]["lat"] == 14.49

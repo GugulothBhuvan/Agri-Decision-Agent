@@ -26,10 +26,10 @@
       <label><input type="radio" name="insured" value="true" {% if f.insured == true %}checked{% endif %}> {{ s['farm.yes'] }}</label>
       <label><input type="radio" name="insured" value="false" {% if f.insured == false %}checked{% endif %}> {{ s['farm.no'] }}</label>
     </div>{{ miss('insured') }}</div>
-  {% if f.village and not f.place_name %}
-  <details class="field"><summary>{{ s['farm.pin'] }}</summary>
-    <div class="row"><input name="lat" type="number" step="0.0001" placeholder="{{ s['card.lat'] }}" aria-label="{{ s['card.lat'] }}" style="flex:1">
-    <input name="lon" type="number" step="0.0001" placeholder="{{ s['card.lon'] }}" aria-label="{{ s['card.lon'] }}" style="flex:1"></div></details>
+  {% if farm %}
+  <details class="field" {% if f.village and not f.place_name %}open{% endif %}><summary>{{ s['farm.pin'] }}</summary>
+    <div class="row"><input name="lat" type="number" step="0.0001" placeholder="{{ s['card.lat'] }}" value="{{ f.lat if f.lat is not none else '' }}" aria-label="{{ s['card.lat'] }}" style="flex:1">
+    <input name="lon" type="number" step="0.0001" placeholder="{{ s['card.lon'] }}" value="{{ f.lon if f.lon is not none else '' }}" aria-label="{{ s['card.lon'] }}" style="flex:1"></div></details>
   {% endif %}
   <div class="row"><button class="btn primary" type="submit">{{ s['farm.save'] }}</button><span class="toast" id="farm-saved" hidden>{{ s['farm.saved'] }}</span></div>
 </form>

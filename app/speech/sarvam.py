@@ -63,7 +63,7 @@ async def tts(text: str, lang: str = "bn") -> str | None:
     """Base64 WAV, or None if speech is unavailable (the reply is then text only)."""
     if not available() or not text:
         return None
-    body = {"text": text[:2400], "target_language_code": LANG_CODES.get(lang, "bn-IN"), "model": "bulbul:v3"}
+    body = {"text": text[:2400], "language_code": LANG_CODES.get(lang, "bn-IN"), "model": "bulbul:v3"}
     if settings().sarvam_speaker:
         body["speaker"] = settings().sarvam_speaker
     try:

@@ -266,6 +266,9 @@ async def api_farm_patch(request: Request, body: dict = Body(...)):
                 setattr(f, k, float(body[k]))
             res["profile"] = tools.get_farm(fid)
             res["missing"] = tools.missing_fields(res["profile"])
+            if not res["missing"]:
+                tools.confirm_profile(fid)
+                res["profile"] = tools.get_farm(fid)
     return res
 
 
