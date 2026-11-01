@@ -29,15 +29,15 @@ def parse_crop(t: str) -> str | None:
 
 def parse_stage(t: str) -> str | None:
     t = t.lower()
-    if re.search(r"কেটে (ফেলেছি|ফেলেছি|রেখেছি|নিয়েছি)|কাটা হয়ে|কেটেছি|already cut|\bcut\b|harvested|কাটা ধান", t):
+    if re.search(r"কেটে (ফেলেছি|ফেলেছি|রেখেছি|নিয়েছি)|কাটা হয়ে|কেটেছি|already cut|\bcut\b|harvested|কাটা ধান|kete (fele|rekh)|ketechi|kata hoye|kat(a|e) (sesh|hoye)", t):
         return "cut"
-    if re.search(r"পেক|পাকা|পেকেছে|ripe|ready|কাটার (সময়|সময়|মতো)|পক गया|पक", t):
+    if re.search(r"পেক|পাকা|পেকেছে|ripe|ready|কাটার (সময়|সময়|মতো)|পক गया|पक|\bpak(e|a)\b|pekeche|pekechhe|pek(e|a) geche|pak gaya", t):
         return "ready"
-    if re.search(r"বিক্রি|sold|बेच", t):
+    if re.search(r"বিক্রি|sold|बेच|bikri", t):
         return "sold"
     if re.search(r"বোনা হয়নি|বুনব|to sow|not (yet )?sown|बोना", t):
         return "to_sow"
-    if re.search(r"বাড়ছে|সবুজ|growing|green|बढ़", t):
+    if re.search(r"বাড়ছে|সবুজ|growing|green|बढ़|barchhe|barche", t):
         return "growing"
     return None
 

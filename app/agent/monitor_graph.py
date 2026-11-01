@@ -16,7 +16,9 @@ from ..config import rules
 from ..db import Alert, Decision, Farm, session_scope
 from ..llm import client as llm
 from ..llm.prompts import PHRASE_SYSTEM, phrase_user
-from ..sources import openmeteo
+from ..rules.market import market_advice as rule_market
+from ..rules.series import Series
+from ..sources import agmarknet, openmeteo
 from . import templates, tools
 from .guardrail import check_reply
 from .trace import traced
@@ -29,6 +31,7 @@ class MonitorState(TypedDict, total=False):
     now: datetime | None
     farms: list[dict]
     fetches: dict[str, Any]          # loc_key -> Forecast
+    market: dict[str, Any]           # crop -> latest mandi fetch
     stale: list[str]                 # locations needing a re-fetch
     unavailable: list[str]           # farm ids with no usable data
     decisions: list[dict]            # recorded decisions this run
@@ -51,7 +54,16 @@ async def fetch_sources(state: MonitorState) -> dict:
     for p in state.get("farms", []):
         locs.setdefault(openmeteo.loc_key(p["lat"], p["lon"]), (p["lat"], p["lon"]))
     results = await asyncio.gather(*(openmeteo.fetch_live(lat, lon) for lat, lon in locs.values()))
-    return {"fetches": dict(zip(locs.keys(), results))}
+    market = {}
+    if agmarknet.available():  # one fetch per commodity per run, shared by every farm
+        crops = {p["crop"] for p in state.get("farms", []) if p.get("crop")}
+        for crop in crops:
+            for commodity in rules()["market"]["commodities"].get(crop, []):
+                res = await agmarknet.fetch_prices("West Bengal", commodity)
+                if res["ok"] and res["records"]:
+                    market[crop] = {**res, "commodity": commodity}
+                    break
+    return {"fetches": dict(zip(locs.keys(), results)), "market": market}
 
 
 @traced(G, "validate", lambda o: f"{len(o.get('stale', []))} stale locations")
@@ -101,6 +113,23 @@ async def evaluate_rules(state: MonitorState) -> dict:
             continue
         for o in outs:
             decisions.append({"farm": p, "outcome": o, "fc": fc})
+        m = (state.get("market") or {}).get(p.get("crop"))
+        if m and p.get("stage") in ("ready", "cut", "growing"):
+            try:
+                risk = any(o.module == "calamity" and o.data.get("action") in ("protect_now", "cover_heap") or
+                           (o.module == "harvest" and not o.data.get("safe_cut_days")) for o in outs)
+                hist = [h["records"] for h in agmarknet.history("West Bengal", m["commodity"],
+                                                                 rules()["market"]["history_days"])
+                        if h["fetch_id"] != m["fetch_id"]]
+                mo = rule_market(m["records"], hist, district=p.get("district"), crop=p["crop"],
+                                 stage=p.get("stage"), rain_risk=risk, cfg=rules())
+                if mo.action_at is not None:
+                    mo.action_at = Series.local_now(state.get("now"))
+                src = {"name": rules()["market"]["source"], "url": m["url"], "fetch_id": m["fetch_id"],
+                       "fetched_at": m["fetched_at"].isoformat(), "what": "daily mandi prices"}
+                decisions.append({"farm": p, "outcome": mo, "fc": None, "src": src})
+            except Exception as e:  # noqa: BLE001 - rule exception logged; module skipped
+                errors.append(f"market {p['id']}: {e}")
     return {"decisions": decisions, "unavailable": unavailable, "errors": errors}
 
 
@@ -108,7 +137,7 @@ async def evaluate_rules(state: MonitorState) -> dict:
 async def diff(state: MonitorState) -> dict:
     out = []
     for d in state.get("decisions", []):
-        rec = tools.record_decision(d["farm"], d["outcome"], d["fc"], "monitor", state.get("now"))
+        rec = tools.record_decision(d["farm"], d["outcome"], d["fc"], "monitor", state.get("now"), src=d.get("src"))
         out.append({**d, "rec": rec})
     return {"decisions": out}
 
@@ -136,6 +165,9 @@ def template_alert(d: dict, lang: str) -> str:
         return templates.calamity(facts, lang)
     if m == "blight":
         return templates.blight(facts, lang)
+    if m == "market":
+        return templates.market({**d["rec"]["data"], "reason_en": d["rec"]["reason_en"], "reason_bn": d["rec"]["reason_bn"],
+                                 "forecast_fetched_at": d["rec"]["forecast_fetched_at"]}, lang)
     if m == "sowing":
         return templates.sowing(facts, lang)
     if m == "claim":

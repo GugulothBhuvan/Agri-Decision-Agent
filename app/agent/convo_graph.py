@@ -18,12 +18,15 @@ from ..llm import client as llm
 from ..llm.prompts import (EXTRACT_SCHEMA, EXTRACT_SYSTEM, PHRASE_SYSTEM, ROUTE_SCHEMA, phrase_user, route_system,
                            route_user)
 from ..speech import sarvam
-from . import parse, templates, tools
+from . import parse, retrieval, templates, tools
 from .guardrail import check_reply
 from .trace import traced
 
 G = "conversation"
-NEEDS_FARM = {"harvest_window", "calamity_check", "claim_status", "blight_check", "sowing_window"}
+NEEDS_FARM = {"harvest_window", "calamity_check", "claim_status", "blight_check", "sowing_window",
+              "market_advice", "soil_advice"}
+# Answers built only from fixed text or verbatim quotes: never re-phrased by the LLM.
+VERBATIM_TOOLS = {"fixed", "knowledge_question", "soil_advice"}
 CONF_MIN = 0.7
 
 
@@ -103,7 +106,10 @@ async def route(state: TurnState) -> dict:
         if r.get("language") == "hi":
             reply_lang = "hi"  # P1: Hindi detected, reply in Hindi (LLM phrasing only)
     else:
-        intents = parse.keyword_intents(text)
+        # LLM unavailable or unsure: nearest intent examples by embedding, then keyword rules.
+        intents, _score = retrieval.route_by_examples(text)
+        if not intents:
+            intents = parse.keyword_intents(text)
     # An answer to the agent's own question is a profile update or a confirmation.
     if awaiting in tools.PROFILE_FIELDS or awaiting in ("village", "cut_date", "area_bigha"):
         # ...unless it is clearly something else (a greeting, a question about rain or cutting).
@@ -154,7 +160,9 @@ async def clarify(state: TurnState) -> dict:
     prefix: list[str] = []
 
     if "confirm_yes" in intents:
-        if aw.get("field") == "confirm_value":
+        if aw.get("field") == "confirm_value" and aw.get("key") == "place":
+            p = tools.set_place(p["id"], aw["value"])
+        elif aw.get("field") == "confirm_value":
             res = await tools.update_profile(p["id"], {aw["key"]: aw["value"]})
             p = res["profile"]
         elif aw.get("field") == "confirm":
@@ -173,6 +181,12 @@ async def clarify(state: TurnState) -> dict:
         res = await tools.update_profile(p["id"], save) if save else {"profile": p, "missing": tools.missing_fields(p),
                                                                        "geocode_failed": False, "changed": []}
         p = res["profile"]
+        if res.get("place_confirm"):
+            c = res["place_confirm"]
+            name = c.get("village_bn") if lang == "bn" and c.get("village_bn") else c.get("village")
+            q = (f"Did you mean {name} ({c.get('display_name')})? Yes or no." if lang == "en"
+                 else f"আপনি কি {name} ({c.get('display_name')}) বললেন? হ্যাঁ বা না বলুন।")
+            return {"question": q, "awaiting_next": {"field": "confirm_value", "key": "place", "value": c}, "profile": p}
         if res["geocode_failed"]:
             return {"question": templates.ask("village_retry", lang), "awaiting_next": {"field": "village"},
                     "profile": p}
@@ -247,7 +261,33 @@ async def act(state: TurnState) -> dict:
             if r is None:
                 outs.append({"tool": "fixed", "key": "no_decision"})
                 continue
-        elif intent in ("greeting", "fertilizer_dose", "out_of_scope"):
+        elif intent == "soil_advice":
+            r = tools.soil_advice(p["id"], now)
+            if r.get("no_card"):
+                outs.append({"tool": "fixed", "key": "no_soil_card"})
+                continue
+        elif intent == "fertilizer_dose":
+            # Only the dose printed on the farmer's own card is ever repeated; none is calculated.
+            if p.get("soil_card_dose"):
+                r = tools.soil_advice(p["id"], now)
+                intent = "soil_advice"
+            else:
+                outs.append({"tool": "fixed", "key": "fertilizer_dose"})
+                continue
+        elif intent == "market_advice":
+            r = await tools.market_advice(p["id"], now)
+            if r.get("available") is False:
+                outs.append({"tool": "fixed", "key": "market_unavailable", "error": r.get("error")})
+                continue
+            if not r.get("applicable"):
+                outs.append({"tool": "fixed", "key": "out_of_scope"})
+                continue
+        elif intent == "knowledge_question":
+            r = tools.knowledge_answer(state["transcript"])
+            if not r["found"]:
+                outs.append({"tool": "fixed", "key": "no_source"})
+                continue
+        elif intent in ("greeting", "out_of_scope"):
             outs.append({"tool": "fixed", "key": intent})
             continue
         else:
@@ -285,6 +325,12 @@ def _template_reply(state: TurnState, lang: str) -> str:
             parts.append(templates.claim(o["result"], lang))
         elif o["tool"] == "explain_decision":
             parts.append(templates.explain(o["result"], lang))
+        elif o["tool"] == "soil_advice":
+            parts.append(templates.soil(o["result"], lang))
+        elif o["tool"] == "market_advice":
+            parts.append(templates.market(o["result"], lang))
+        elif o["tool"] == "knowledge_question":
+            parts.append(templates.knowledge(o["result"], lang))
     return " ".join(p for p in parts if p)
 
 
@@ -307,6 +353,8 @@ def _phrase_facts(state: TurnState, lang: str) -> list[dict]:
             if r.get(k):
                 r[k + "_spoken"] = fmt_time(datetime.fromisoformat(r[k]), L)
         r.pop("days", None)
+        if o["tool"] == "knowledge_question":
+            r = {"passages": [{"source": x["source"], "url": x["url"], "quote": x["text"]} for x in r["passages"]]}
         facts.append({"tool": o["tool"], **r})
     if state.get("prefix"):
         facts.insert(0, {"say_first": " ".join(state["prefix"])})
@@ -318,6 +366,10 @@ async def compose(state: TurnState) -> dict:
     t0 = time.perf_counter()
     lang = state.get("reply_lang") or state["lang"]
     facts = _phrase_facts(state, lang)
+    if all(o["tool"] in VERBATIM_TOOLS for o in state.get("tool_outputs", [])):
+        # Quotes and fixed texts are given exactly as written; an LLM paraphrase could change their meaning.
+        return {"reply": _template_reply(state, "en" if lang == "en" else "bn"), "reply_source": "template",
+                "timings": _t(state, "llm_ms", t0)}
     text = await llm.complete_text(PHRASE_SYSTEM, phrase_user(facts, lang, None))
     if text:
         return {"reply": text, "reply_source": "llm", "timings": _t(state, "llm_ms", t0)}

@@ -46,6 +46,15 @@ class Farm(Base):
     language: Mapped[str] = mapped_column(String(5), default="bn")
     address_as: Mapped[str | None] = mapped_column(Text)  # only what the farmer chose
     profile_confirmed: Mapped[bool] = mapped_column(Boolean, default=False)
+    place_source: Mapped[str | None] = mapped_column(String(40))  # gazetteer | nominatim | manual
+    # Soil Health Card, typed by the family from their card. Never estimated.
+    soil_ph: Mapped[float | None] = mapped_column(Float)
+    soil_oc_pct: Mapped[float | None] = mapped_column(Float)
+    soil_n_kg_ha: Mapped[float | None] = mapped_column(Float)
+    soil_p_kg_ha: Mapped[float | None] = mapped_column(Float)
+    soil_k_kg_ha: Mapped[float | None] = mapped_column(Float)
+    soil_card_dose: Mapped[str | None] = mapped_column(Text)
+    soil_card_date: Mapped[date | None] = mapped_column(Date)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
 
@@ -167,6 +176,22 @@ SessionLocal = sessionmaker(bind=engine, expire_on_commit=False)
 
 def init_db() -> None:
     Base.metadata.create_all(engine)
+    _add_missing_columns()
+
+
+def _add_missing_columns() -> None:
+    """Additive-only migration: add columns that newer code expects to tables created by older code."""
+    from sqlalchemy import inspect
+    insp = inspect(engine)
+    with engine.begin() as conn:
+        for table in Base.metadata.sorted_tables:
+            if not insp.has_table(table.name):
+                continue
+            have = {c["name"] for c in insp.get_columns(table.name)}
+            for col in table.columns:
+                if col.name not in have:
+                    coltype = col.type.compile(dialect=engine.dialect)
+                    conn.exec_driver_sql(f'ALTER TABLE {table.name} ADD COLUMN {col.name} {coltype}')
 
 
 @contextmanager

@@ -40,6 +40,13 @@ def action_line(d: dict, lang: str) -> str:
         if o.get("plant_days"):
             return t("card.sow_from", lang, day=fmt_day(o["plant_days"][0], lang))
         return t("card.sow_wait", lang, n=num(o.get("horizon_days", 7), lang))
+    if m == "soil":
+        low = [r for r in o.get("rows", []) if r["rating"] in ("low", "acidic", "alkaline")]
+        return t("card.soil_review", lang, n=num(len(low), lang)) if low else t("card.soil_ok", lang)
+    if m == "market":
+        if o.get("action") == "no_data":
+            return t("card.market_none", lang)
+        return t("card.market_price", lang, price=num(o["today_median"], lang))
     if m == "claim":
         if o.get("action") == "claim_open":
             dl = datetime.fromisoformat(o["deadline_at"])
@@ -70,7 +77,7 @@ def home_decision(farm_id: str) -> dict | None:
         return latest["claim"]
     if "calamity" in latest and latest["calamity"]["actionable"]:
         return latest["calamity"]
-    for m in ("harvest", "blight", "sowing", "calamity", "claim"):
+    for m in ("harvest", "blight", "sowing", "calamity", "market", "soil", "claim"):
         if m in latest:
             return latest[m]
     return None

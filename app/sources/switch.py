@@ -4,6 +4,7 @@ from __future__ import annotations
 SOURCES = {
     "openmeteo": "Open-Meteo forecast API",
     "nominatim": "Nominatim (OpenStreetMap)",
+    "agmarknet": "Agmarknet mandi prices",
     "sarvam": "Sarvam speech",
     "llm": "LLM (OpenRouter / Claude)",
 }

@@ -43,4 +43,26 @@ sowing_potato:                      # P1
   consecutive_days: 3               # team: three suitable days in a row
   horizon_days: 7
 
+soil_rating:                        # Soil Health Card values -> low / medium / high
+  source: "TNAU Agritech Portal, Rating Chart for Soil Test Data"
+  url: "https://agritech.tnau.ac.in/agriculture/agri_soil_soilratingchart.html"
+  # Organic carbon: the page prints "0.5 - 7.5%" for medium; its own high band starts at 0.75%, so 0.75 is used.
+  organic_carbon_pct: {low_below: 0.5, high_above: 0.75}
+  nitrogen_kg_ha: {low_below: 240, high_above: 480}   # some labs use 280 / 560: the rating printed on the card wins
+  phosphorus_kg_ha: {low_below: 11, high_above: 22}
+  potassium_kg_ha: {low_below: 110, high_above: 280}
+  ph: {acidic_below: 6.0, normal_to: 8.5, alkaline_above: 9.0}
+
+market:
+  source: "Agmarknet daily mandi prices via data.gov.in (Open Government Data Platform India)"
+  url: "https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070"
+  resource_id: "9ef84268-d588-465a-a308-a864a43d0070"
+  commodities: {paddy_aman: ["Paddy(Dhan)(Common)", "Paddy(Dhan)(Basmati)", "Paddy"], potato: ["Potato"]}
+  history_days: 14                  # team: compare today's modal price with stored fetches from the last 14 days
+  move_pct: 5                       # team: a change of 5% or more from the recent median counts as a real move
+
+embeddings:                         # starting values; tune on tests/embedding_eval before the demo
+  ngram:  {place_accept: 0.85, place_confirm: 0.70, intent_route: 0.45, kb_min: 0.35}
+  neural: {place_accept: 0.90, place_confirm: 0.80, intent_route: 0.75, kb_min: 0.60}
+
 freshness_hours: 6

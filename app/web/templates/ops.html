@@ -53,11 +53,12 @@
   </section>
   <section class="card">
     <h2>Source health</h2>
-    <ul class="plain">{% for h in o.health %}{% if h.source in ['openmeteo', 'nominatim'] %}
+    <ul class="plain">{% for h in o.health %}{% if h.source in ['openmeteo', 'nominatim', 'agmarknet'] %}
       <li><strong>{{ h.name }}</strong> — {% if h.last %}<span class="{{ 'ok' if h.last_ok else 'bad' }}">{{ 'ok' if h.last_ok else 'failed' }}</span> <span class="mono">{{ h.last }}</span>{% else %}<span class="muted">no calls yet</span>{% endif %}
         {% if h.last_error %}<br><span class="small bad">{{ h.last_error }}</span>{% endif %}
         {% if h.last_success %}<br><span class="small muted">last success {{ h.last_success }}</span>{% endif %}</li>
     {% endif %}{% endfor %}</ul>
+    <p class="small">Embeddings: <span class="mono">{{ o.retrieval.engine }}</span> · village list: {{ o.retrieval.places }} places{% if not o.retrieval.places %} <span class="bad">(run scripts/build_places.py)</span>{% endif %} · mandi key: {{ 'set' if o.retrieval.market_key else 'not set' }}</p>
     <p class="small">Voice turn p90: <span class="stat">{{ (o.stats.turn_p90_ms / 1000) | round(1) if o.stats.turn_p90_ms else '—' }}</span> s</p>
   </section>
   <section class="card">

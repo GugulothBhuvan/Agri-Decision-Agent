@@ -42,6 +42,12 @@ flowchart LR
 | `app/llm/` | LLM client (OpenRouter or Claude; JSON replies checked against the schema; timeout) and prompt contracts |
 | `app/speech/sarvam.py` | ffmpeg webm→16 kHz WAV, Saaras v3 STT, Bulbul v3 TTS |
 | `app/web/` | Server-rendered pages, `app.js` (no build step), `strings/bn.json`, `strings/en.json` |
+| `app/embeddings/` | Embedding engines (built-in n-gram, or a neural model) and a small in-memory vector index |
+| `app/agent/retrieval.py` | Intent fallback by nearest examples; cited knowledge search |
+| `app/sources/places.py` | Village list matching (Bengali or Latin script) before Nominatim |
+| `app/sources/agmarknet.py`, `app/rules/market.py` | Mandi prices and the sell / hold comparison |
+| `app/rules/soil.py` | Soil Health Card ratings; repeats the card's dose, never computes one |
+| `data/` | Intent examples, cited knowledge passages, and `places.json` (built by `scripts/build_places.py`) |
 | `rules.yaml` | Every threshold with its source; `team` marks our own design choices |
 
 ## Setup
@@ -52,6 +58,7 @@ Python 3.11+ and ffmpeg.
 python -m venv .venv && . .venv/bin/activate
 pip install -r requirements-dev.txt
 cp .env.example .env   # paste SARVAM_API_KEY and LLM_API_KEY
+python -m scripts.build_places     # village list for Paschim Medinipur from OpenStreetMap
 python -m scripts.check_services   # one live call to each outside service
 uvicorn app.main:app --reload
 ```
@@ -100,9 +107,26 @@ pytest
 5. Pulled plug: switch **Open-Meteo** off on `/ops`, press **Run now**, ask again. The agent uses the last real
    fetch under 6 hours, labelled with its time; with no such fetch it says the forecast is unavailable.
 
+## Embeddings
+
+Embeddings only find things; they never produce a date, amount, dose or yes/no.
+
+- **Village matching:** a spoken name in Bengali script is matched to the OpenStreetMap village list, then
+  Nominatim. Below the accept score the agent reads the match back as a question.
+- **Intent fallback:** when the LLM is off or rate-limited, the turn is routed to the nearest example sentences in
+  `data/intent_examples.json`; when nothing is close enough it abstains and falls back to keyword rules.
+- **Cited knowledge:** questions like "why 72 hours?" are answered by quoting a passage from
+  `data/kb_passages.json`, word for word, with its source. Below the threshold it says it has no source.
+
+The default engine is built in (character n-grams with Bengali-to-Latin transliteration): no download, and every
+test runs on it. On the held-out sentences in `tests/intent_eval.json` it routes 23 of 27 correctly and abstains on
+the rest. Set `EMBEDDINGS_MODEL` for a neural model; its thresholds in `rules.yaml` are untuned starting values.
+
 ## Known limits
 
 - Past-day rain is a model estimate, not a rain gauge; it is labelled "estimated" in the claim kit.
 - Days run midnight to midnight IST, not IMD's 08:30 to 08:30.
 - Blight watch runs a station-validated rule on forecasts; the app says so on its Why page.
+- Mandi price history is built from this app's own daily fetches, so trends appear after a few days of running.
+- Soil ratings use the TNAU rating chart; when the card prints its own rating, that wins.
 - Hindi: detected by the router; replies in Hindi only when the LLM is on.

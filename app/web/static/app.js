@@ -259,6 +259,17 @@ if (page === "farm") {
     $("#farm-saved").hidden = false;
     setTimeout(() => location.reload(), 600);
   });
+  $("#soil-form")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const body = {};
+    for (const [k, v] of new FormData(e.currentTarget).entries()) {
+      if (v === "") continue;
+      body[k] = (k === "soil_card_dose" || k === "soil_card_date") ? v : Number(v);
+    }
+    await api("/api/farm", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    $("#soil-saved").hidden = false;
+    setTimeout(() => location.reload(), 600);
+  });
   $$('input[name="language"]').forEach((r) => r.addEventListener("change", async () => {
     await api("/api/lang", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ lang: r.value }) });
     location.reload();

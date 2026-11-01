@@ -33,6 +33,19 @@
   {% endif %}
   <div class="row"><button class="btn primary" type="submit">{{ s['farm.save'] }}</button><span class="toast" id="farm-saved" hidden>{{ s['farm.saved'] }}</span></div>
 </form>
+{% if farm %}
+<form class="card" id="soil-form" autocomplete="off">
+  <h2>{{ s['soil.title'] }}</h2>
+  <p class="small muted">{{ s['soil.help'] }}</p>
+  {% for key, label in [('soil_ph', 'soil.ph'), ('soil_oc_pct', 'soil.oc'), ('soil_n_kg_ha', 'soil.n'), ('soil_p_kg_ha', 'soil.p'), ('soil_k_kg_ha', 'soil.k')] %}
+  <div class="field"><label for="f-{{ key }}">{{ s[label] }}</label>
+    <input id="f-{{ key }}" name="{{ key }}" type="number" step="0.01" min="0" inputmode="decimal" value="{{ f[key] if f[key] is not none else '' }}"></div>
+  {% endfor %}
+  <div class="field"><label for="f-soil-dose">{{ s['soil.dose'] }}</label><input id="f-soil-dose" name="soil_card_dose" value="{{ f.soil_card_dose or '' }}" placeholder="{{ s['soil.dose_ph'] }}"></div>
+  <div class="field"><label for="f-soil-date">{{ s['soil.date'] }}</label><input id="f-soil-date" name="soil_card_date" type="date" value="{{ f.soil_card_date or '' }}"></div>
+  <div class="row"><button class="btn primary" type="submit">{{ s['farm.save'] }}</button><span class="toast" id="soil-saved" hidden>{{ s['farm.saved'] }}</span></div>
+</form>
+{% endif %}
 <section class="card">
   <div class="field"><label>{{ s['farm.language'] }}</label>
     <div class="seg">

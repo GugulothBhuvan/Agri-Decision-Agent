@@ -27,3 +27,5 @@ services:
         value: agri-decision-agent/0.1 (contact: bhuvanrajnaik@gmail.com)
       - key: SCHEDULE_HOURS
         value: "3"
+      - key: DATA_GOV_API_KEY
+        sync: false

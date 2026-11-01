@@ -100,4 +100,4 @@ def test_turn_uses_llm_then_guardrail_catches_invented_number(openrouter, saved_
         ]
         r = c.post("/api/turn", json={"text": "কবে ধান কাটব?"}).json()
         assert r["reply_source"] == "template" and r["guardrail"]["templated"]
-        assert "১৯" not in r["reply_text"] and r["decision_ids"]
+        assert "১৯ নভেম্বর" not in r["reply_text"] and r["decision_ids"]

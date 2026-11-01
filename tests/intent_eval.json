@@ -1,0 +1,110 @@
+[
+[
+"ধান কাটব কবে, বলুন তো",
+"harvest_window"
+],
+[
+"porshu dhan katle hobe?",
+"harvest_window"
+],
+[
+"good day this week to reap the paddy",
+"harvest_window"
+],
+[
+"রাতে কি ঝড়বৃষ্টি হবে",
+"calamity_check"
+],
+[
+"heavy rain tonight?",
+"calamity_check"
+],
+[
+"ধান কি ঢাকা দেব",
+"calamity_check"
+],
+[
+"বৃষ্টিতে ধান ভিজে গেছে, বিমার দাবি করব কীভাবে",
+"claim_status"
+],
+[
+"how do I claim insurance for wet paddy",
+"claim_status"
+],
+[
+"আলুতে কি স্প্রে লাগবে",
+"blight_check"
+],
+[
+"blight on my potato?",
+"blight_check"
+],
+[
+"আলু কবে লাগাব",
+"sowing_window"
+],
+[
+"best time to put potato seed in the ground",
+"sowing_window"
+],
+[
+"আজ ধানের দাম কত চলছে",
+"market_advice"
+],
+[
+"should I sell paddy today or wait",
+"market_advice"
+],
+[
+"মান্ডিতে দর কেমন",
+"market_advice"
+],
+[
+"আমার মাটির পরীক্ষার ফল বুঝিয়ে বলুন",
+"soil_advice"
+],
+[
+"what does my soil card mean",
+"soil_advice"
+],
+[
+"বিঘাপ্রতি কত ইউরিয়া",
+"fertilizer_dose"
+],
+[
+"urea dose per bigha",
+"fertilizer_dose"
+],
+[
+"ভারী বৃষ্টি কত মিমি হলে",
+"knowledge_question"
+],
+[
+"why is the claim window 72 hours",
+"knowledge_question"
+],
+[
+"এই পরামর্শ কেন দিলেন",
+"explain_decision"
+],
+[
+"where did you get this from",
+"explain_decision"
+],
+[
+"নমস্কার, কেমন আছেন",
+"greeting"
+],
+[
+"thank you so much",
+"greeting"
+],
+[
+"সমবায় থেকে ঋণ নেব কীভাবে",
+"out_of_scope"
+],
+[
+"what's the cricket score",
+"out_of_scope"
+]
+]

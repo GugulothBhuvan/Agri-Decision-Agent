@@ -156,9 +156,10 @@ async def why(request: Request, decision_id: int):
     for src in d["sources"]:
         src["time"] = fmt_time(datetime.fromisoformat(src["fetched_at"]), lang)
     reason = d["reason_en"] if lang == "en" else d["reason_bn"]
-    days = d["outcome"].get("days") or []
+    days = d["outcome"].get("days") or d["outcome"].get("rows") or d["outcome"].get("markets") or []
     for x in days:
-        x["label"] = fmt_day(x["date"], lang)
+        if x.get("date") and d["module"] not in ("market",):
+            x["label"] = fmt_day(x["date"], lang)
     return _page(request, "why.html", d=d, reason=reason, days=days,
                  tier_label=t(f"tier.{d['tier']}", lang), when=fmt_time(datetime.fromisoformat(d["created_at"]), lang))
 
@@ -249,7 +250,8 @@ async def api_farm_patch(request: Request, body: dict = Body(...)):
         fid = tools.create_farm(_lang(request))["id"]
         request.session["farm_id"] = fid
     allowed = {k: body[k] for k in ("name", "village", "district", "crop", "area_bigha", "stage", "cut_date",
-                                    "insured", "address_as", "language") if k in body}
+                                    "insured", "address_as", "language", "soil_ph", "soil_oc_pct", "soil_n_kg_ha",
+                                    "soil_p_kg_ha", "soil_k_kg_ha", "soil_card_dose", "soil_card_date") if k in body}
     if "language" in allowed:
         if allowed["language"] not in ("bn", "en"):
             raise HTTPException(400, "language must be bn or en")
@@ -419,7 +421,12 @@ def _ops_overview(request: Request) -> dict:
                         .order_by(Message.id.desc()).limit(50).all())
     totals = sorted((m.timings or {}).get("total_ms", 0) for m in latest_turns if (m.timings or {}).get("total_ms"))
     p90 = totals[int(0.9 * (len(totals) - 1))] if totals else None
+    from .embeddings import get_embedder
+    from .sources import agmarknet as _ag, places as _pl
+    retrieval_status = {"engine": get_embedder().name, "places": _pl.count(),
+                        "market_key": bool(_ag.api_key())}
     return {"farms": farms, "decisions": decisions, "health": health, "traces": traces, "errors": errors,
+            "retrieval": retrieval_status,
             "sources": switch.state(), "stats": {"decisions": n_dec, "with_source": n_src, "turn_p90_ms": p90}}
 
 

@@ -28,6 +28,14 @@
     <tr><th></th><th>{{ s['why.rh_hours'] }}</th><th>{{ s['why.temp_hours'] }}</th><th>{{ s['why.rain2'] }}</th><th></th></tr>
     {% for x in days %}<tr><td>{{ x.label }}</td><td class="mono">{{ x.rh_hours }}</td><td class="mono">{{ x.temp_hours }}</td><td class="mono">{{ x.rain_2day_mm }}</td>
       <td>{% if x.meets %}<span class="chip amber">{{ s['why.risk'] }}</span>{% else %}<span class="chip green">{{ s['why.not_ok'] }}</span>{% endif %}</td></tr>{% endfor %}
+  {% elif d.module == 'soil' %}
+    <tr><th></th><th>{{ s['soil.value'] }}</th><th>{{ s['soil.rating'] }}</th></tr>
+    {% for x in days %}<tr><td>{{ s['soil.' ~ {'ph':'ph','organic_carbon_pct':'oc','nitrogen_kg_ha':'n','phosphorus_kg_ha':'p','potassium_kg_ha':'k'}[x.key]] }}</td>
+      <td class="mono">{{ x.value }}</td><td><span class="chip {{ 'amber' if x.rating in ['low','acidic','alkaline'] else 'green' }}">{{ s['soil.r.' ~ x.rating] }}</span>{% if x.from_card %} <span class="small muted">{{ s['soil.from_card'] }}</span>{% endif %}</td></tr>{% endfor %}
+  {% elif d.module == 'market' %}
+    <tr><th>{{ s['market.market'] }}</th><th>{{ s['market.modal'] }}</th><th>{{ s['market.range'] }}</th><th>{{ s['market.date'] }}</th></tr>
+    {% for x in days %}<tr><td>{{ x.market }}<br><span class="small muted">{{ x.district }}{% if x.variety %} · {{ x.variety }}{% endif %}</span></td>
+      <td class="mono">₹{{ x.modal }}</td><td class="mono">{% if x['min'] is not none %}₹{{ x['min']|int }}–{{ x['max']|int }}{% endif %}</td><td class="mono">{{ x.date or '' }}</td></tr>{% endfor %}
   {% elif d.module == 'sowing' %}
     <tr><th></th><th>{{ s['why.tmax'] }}</th><th>{{ s['why.tmin'] }}</th><th>{{ s['why.rain'] }}</th><th></th></tr>
     {% for x in days %}<tr><td>{{ x.label }}</td><td class="mono">{{ x.tmax_c }}</td><td class="mono">{{ x.tmin_c }}</td><td class="mono">{{ x.rain_mm }}</td>

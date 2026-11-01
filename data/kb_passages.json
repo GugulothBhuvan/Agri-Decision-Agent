@@ -1,0 +1,50 @@
+[
+ {
+  "id": "sbi-bsb-postharvest",
+  "source": "Bangla Shasya Bima prospectus, SBI General",
+  "url": "https://content.sbigeneral.in/uploads/Bangla_Shasya_Bima_Prospectus_254049b6c4.pdf",
+  "topic_bn": "ফসল কাটার পরের ক্ষতি, ৭২ ঘণ্টা, দুই সপ্তাহ, বিমা দাবি, অসময়ের বৃষ্টি",
+  "text": "Post-harvest losses. Losses to the Insured Beneficiary from certain crops in designated areas must be dried in the field after harvesting and are covered against specific risks like hailstorms and unseasonal rains. This applies mainly to Paddy crops for Kharif and Rabi seasons, with coverage lasting up to two weeks post-harvest. Loss reports need to be submitted within 72 hours.",
+  "topic_en": "post harvest loss, crop dried in field after cutting, unseasonal rain, how long covered after harvest, two weeks, claim within 72 hours, why 72 hours"
+ },
+ {
+  "id": "sbi-bsb-localized",
+  "source": "Bangla Shasya Bima prospectus, SBI General",
+  "url": "https://content.sbigeneral.in/uploads/Bangla_Shasya_Bima_Prospectus_254049b6c4.pdf",
+  "topic_bn": "স্থানীয় দুর্যোগ, শিলাবৃষ্টি, জলমগ্ন, ৭২ ঘণ্টার মধ্যে জানানো",
+  "text": "Localized Calamities. This coverage is designed to offer losses for the insured beneficiary from specific risks like hailstorms, tornadoes, landslides, inundation, cloud bursts, and natural fires affecting certain crops in designated areas are covered. This applies to major crops in Kharif and Rabi seasons, requiring loss notifications within 72 hours.",
+  "topic_en": "localized calamity, hailstorm, inundation, flooding, landslide, loss notification within 72 hours"
+ },
+ {
+  "id": "imd-rain-amounts",
+  "source": "IMD Hyderabad forecast bulletin terminology",
+  "url": "https://mausam.imd.gov.in/hyderabad/mcdata/tsfcst.pdf",
+  "topic_bn": "বৃষ্টির পরিমাণ, হালকা বৃষ্টি, মাঝারি বৃষ্টি, ভারী বৃষ্টি, মিলিমিটার, মিমি",
+  "text": "Rainfall amount (mm): Very Light rainfall: Trace to 2.4mm, Light Rainfall: 2.5 to 15.5mm, Moderate Rainfall: 15.6 to 64.4mm, Heavy rain: 64.5 – 115.5, Very heavy rain: 115.6 – 204.4, Extremely heavy rain: 204.5 or more.",
+  "topic_en": "what counts as heavy rain, moderate rain, light rain, how many mm, rainfall categories"
+ },
+ {
+  "id": "imd-spatial",
+  "source": "IMD Hyderabad forecast bulletin terminology",
+  "url": "https://mausam.imd.gov.in/hyderabad/mcdata/tsfcst.pdf",
+  "topic_bn": "বৃষ্টি কত জায়গায়, বিক্ষিপ্ত, কয়েক জায়গায়, অনেক জায়গায়",
+  "text": "Spatial rainfall distribution: Isolated: <25%, A few: 26-50%, Many: 51-75%, Most: 76-100%",
+  "topic_en": "isolated, a few places, many places, most places, rainfall spread"
+ },
+ {
+  "id": "cpri-potato-thermal",
+  "source": "Bhardwaj et al. 2022, Characterizing the Potato Growing Regions in India (ICAR-CPRI), Life 12(10):1619",
+  "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9605082/",
+  "topic_bn": "আলুর জন্য তাপমাত্রা, সর্বোচ্চ সর্বনিম্ন তাপমাত্রা, আলু চাষের মরসুম",
+  "text": "The plausible potato growing season at each location was delineated based on thermal limits including a maximum temperature less than 35 °C and a minimum temperature between 2 °C and 21 °C, at least three weeks after the maximum temperature condition is met.",
+  "topic_en": "potato temperature, minimum and maximum temperature for potato, potato growing season"
+ },
+ {
+  "id": "tnau-soil-chart",
+  "source": "TNAU Agritech Portal, Rating Chart for Soil Test Data",
+  "url": "https://agritech.tnau.ac.in/agriculture/agri_soil_soilratingchart.html",
+  "topic_bn": "মাটি পরীক্ষা, জৈব কার্বন, নাইট্রোজেন, ফসফরাস, পটাশ, পিএইচ, কম মাঝারি বেশি, মাটিতে নাইট্রোজেন কম, মাটি অম্ল, মাটির পিএইচ",
+  "text": "Rating Chart for Soil Test Data. Organic carbon: Low < 0.5 %, High > 0.75%. Available nitrogen (N): Low < 240 Kg/ha, Medium 240-480 kg/ha, High > 480 Kg/ha. Available Phosphorus (P): Low < 11.0 Kg/ha, Medium 11 – 22 Kg/ha, High > 22 Kg/ha. Available potassium (K): Low < 110 Kg/ha, Medium 110-280 Kg/ha, High > 280 Kg/ha. pH: Acids < 6.0; Normal to Saline 6.0 to 8.5; Tending to become Alkaline 8.9 to 9.0; Alkaline > 9.0.",
+  "topic_en": "soil test rating, organic carbon, nitrogen, phosphorus, potassium, low medium high, soil pH, acidic, alkaline"
+ }
+]

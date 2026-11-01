@@ -44,6 +44,12 @@ FIXED = {
     "forecast_unavailable": {"bn": "এখন আবহাওয়ার পূর্বাভাস পাওয়া যাচ্ছে না, আর ছয় ঘণ্টার মধ্যের কোনো তথ্যও নেই। তাই এখন কোনো পরামর্শ দিচ্ছি না। একটু পরে আবার জিজ্ঞেস করুন।",
                              "en": "The weather forecast is unavailable right now and there is no fetch from the last six hours, so I won't advise yet. Please ask again a little later."},
     "need_profile": {"bn": "আগে আপনার জমির কথা একটু জেনে নিই।", "en": "First, let me learn a little about your field."},
+    "no_soil_card": {"bn": "আপনার মাটি পরীক্ষার কার্ডের তথ্য এখনও নেই। 'আমার জমি' পাতায় কার্ডের পিএইচ, জৈব কার্বন, নাইট্রোজেন, ফসফরাস আর পটাশ লিখুন, আমি বুঝিয়ে দেব।",
+                     "en": "I don't have your Soil Health Card yet. Enter its pH, organic carbon, N, P and K on My farm and I'll explain them."},
+    "market_unavailable": {"bn": "এখন মান্ডির দামের তথ্য পাওয়া যাচ্ছে না, তাই দাম নিয়ে কিছু বলছি না। কাছের বাজার বা সরকারি ধান ক্রয়কেন্দ্রে দর জেনে নিন।",
+                           "en": "Mandi prices are unavailable right now, so I won't comment on prices. Check the rate at your nearest market or the government procurement centre."},
+    "no_source": {"bn": "এ বিষয়ে আমার কাছে কোনো নির্ভরযোগ্য সূত্র নেই, তাই আন্দাজে বলছি না। ব্লক কৃষি অফিসে জিজ্ঞেস করুন।",
+                  "en": "I don't have a reliable source for that, so I won't guess. Please ask your block agriculture office."},
     "potato_stage": {"bn": "আলু গাছ বাড়লে ঝলসা রোগের সতর্কতা দিই, আর বোনার আগে বোনার দিন বলি। আপনার আলু কোন অবস্থায় আছে?",
                      "en": "For potato I watch for late blight while it grows and suggest planting days before sowing. What stage is your potato at?"},
     "not_ready_stage": {"bn": "ধান পাকলে বা কাটা হলে কাটার নিরাপদ দিন বলব। ধান পাকলে আমাকে জানাবেন।",
@@ -162,6 +168,29 @@ def sowing(facts: dict, lang: str, with_source: bool = True) -> str:
         s = (f"Not yet: no good planting day in the next {n} days. Nights are still too warm. I'll tell you when that changes."
              if L == "en" else f"এখনও নয়: আগামী {num(n, L)} দিনে আলু বোনার ভালো দিন নেই, রাত এখনও গরম। বদলালে জানাব।")
     return s + (_src(facts, L) if with_source else "")
+
+
+def soil(facts: dict, lang: str) -> str:
+    L = "en" if lang == "en" else "bn"
+    return (facts.get("reason_en") if L == "en" else facts.get("reason_bn")) or ""
+
+
+def market(facts: dict, lang: str) -> str:
+    L = "en" if lang == "en" else "bn"
+    text = (facts.get("reason_en") if L == "en" else facts.get("reason_bn")) or ""
+    when = facts.get("forecast_fetched_at")
+    t = fmt_time(datetime.fromisoformat(when), L) if when else ""
+    return text + (f" Source: Agmarknet via data.gov.in, fetched {t}." if L == "en"
+                   else f" সূত্র: অ্যাগমার্কনেট (data.gov.in), {t}।")
+
+
+def knowledge(facts: dict, lang: str) -> str:
+    """The passage verbatim, with its source. Never paraphrased."""
+    L = "en" if lang == "en" else "bn"
+    p = facts["passages"][0]
+    if L == "en":
+        return f"From {p['source']}: \"{p['text']}\""
+    return f"{p['source']}-এ লেখা আছে (ইংরেজিতে): \"{p['text']}\""
 
 
 def claim(facts: dict, lang: str) -> str:
