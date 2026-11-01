@@ -127,6 +127,8 @@ KEYWORDS = [
     ("fertilizer_dose", r"সার|ইউরিয়া|পটাশ|fertili[sz]er|urea|dap|potash|खाद|यूरिया"),
     ("claim_status", r"দাবি|ক্লেম|বিমার টাকা|ক্ষতিপূরণ|claim|compensation|क्लेम|मुआवजा"),
     ("explain_decision", r"কেন|কোথা থেকে|সূত্র|\bwhy\b|source|where .* from|क्यों"),
+    ("blight_check", r"ঝলসা|ধসা|ধ্বসা|blight|ছত্রাক|fungicide|spray|স্প্রে|झुलसा"),
+    ("sowing_window", r"কবে (আলু )?বুন|বোনার|লাগাব|plant(ing)? potato|when .*(sow|plant)|बुवाई"),
     ("calamity_check", r"ঝড়|ঝড়|ভারী বৃষ্টি|বৃষ্টি আসবে|ঢাক|storm|heavy rain|cyclone|cover|तूफान|बारिश"),
     ("harvest_window", r"কাটব|কাটার|কবে কাট|কাটা যাবে|harvest|when .*cut|safe day|cut (my|the)|कटाई|काट"),
     ("greeting", r"^(নমস্কার|হ্যালো|hello|hi|namaskar|ধন্যবাদ|thanks|thank you|नमस्ते)\b"),

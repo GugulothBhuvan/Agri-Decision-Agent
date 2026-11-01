@@ -23,7 +23,7 @@ from .guardrail import check_reply
 from .trace import traced
 
 G = "conversation"
-NEEDS_FARM = {"harvest_window", "calamity_check", "claim_status"}
+NEEDS_FARM = {"harvest_window", "calamity_check", "claim_status", "blight_check", "sowing_window"}
 CONF_MIN = 0.7
 
 
@@ -201,7 +201,10 @@ async def clarify(state: TurnState) -> dict:
     # Profile complete and confirmed: if the turn was only profile talk, give today's decision.
     rest = [i for i in intents if i not in ("profile_update", "confirm_yes", "confirm_no")]
     if not rest:
-        rest = ["calamity_check", "harvest_window"] if p.get("stage") in ("ready", "cut") else []
+        if p.get("crop") == "potato":
+            rest = {"growing": ["blight_check"], "to_sow": ["sowing_window"]}.get(p.get("stage"), [])
+        else:
+            rest = ["calamity_check", "harvest_window"] if p.get("stage") in ("ready", "cut") else []
     return {"intents": rest, "prefix": prefix, "profile": p, "awaiting_next": None}
 
 
@@ -232,6 +235,12 @@ async def act(state: TurnState) -> dict:
                 intent = "claim_status"
         elif intent == "claim_status":
             r = tools.claim_status(p["id"], now)
+        elif intent in ("blight_check", "sowing_window"):
+            need = "growing" if intent == "blight_check" else "to_sow"
+            if p.get("crop") != "potato" or p.get("stage") != need:
+                outs.append({"tool": "fixed", "key": "potato_stage" if p.get("crop") == "potato" else "out_of_scope"})
+                continue
+            r = await (tools.blight_check if intent == "blight_check" else tools.sowing_window)(p["id"], now)
         elif intent == "explain_decision":
             latest = [d for d in tools.latest_decisions(p["id"]) if d["actionable"]] or tools.latest_decisions(p["id"])
             r = tools.explain_decision(latest[0]["decision_id"], p["id"]) if latest else None
@@ -255,7 +264,8 @@ async def act(state: TurnState) -> dict:
 def _template_reply(state: TurnState, lang: str) -> str:
     parts = list(state.get("prefix") or [])
     outs = state.get("tool_outputs", [])
-    forecast_tools = [i for i, o in enumerate(outs) if o["tool"] in ("harvest_window", "calamity_check")]
+    forecast_tools = [i for i, o in enumerate(outs)
+                      if o["tool"] in ("harvest_window", "calamity_check", "blight_check", "sowing_window")]
     last_fc = forecast_tools[-1] if forecast_tools else -1
     for idx, o in enumerate(outs):
         if o["tool"] == "fixed":
@@ -267,6 +277,10 @@ def _template_reply(state: TurnState, lang: str) -> str:
             parts.append(templates.harvest(o["result"], lang, with_source=idx == last_fc))
         elif o["tool"] == "calamity_check":
             parts.append(templates.calamity(o["result"], lang, with_source=idx == last_fc))
+        elif o["tool"] == "blight_check":
+            parts.append(templates.blight(o["result"], lang, with_source=idx == last_fc))
+        elif o["tool"] == "sowing_window":
+            parts.append(templates.sowing(o["result"], lang, with_source=idx == last_fc))
         elif o["tool"] == "claim_status":
             parts.append(templates.claim(o["result"], lang))
         elif o["tool"] == "explain_decision":
@@ -283,11 +297,12 @@ def _phrase_facts(state: TurnState, lang: str) -> list[dict]:
             facts.append({"say_exactly": templates.fixed(o["key"], L) if o["key"] != "no_decision" else "no advice yet"})
             continue
         r = dict(o["result"])
-        for k in ("safe_cut_days",):
+        for k in ("safe_cut_days", "plant_days"):
             if r.get(k):
                 r[k + "_spoken"] = [fmt_day(d, L) for d in r[k]]
-        if r.get("first_rain_day"):
-            r["first_rain_day_spoken"] = fmt_day(r["first_rain_day"], L)
+        for k in ("first_rain_day", "first_risk_day", "spray_by"):
+            if r.get(k):
+                r[k + "_spoken"] = fmt_day(r[k], L)
         for k in ("deadline_at", "event_at", "forecast_fetched_at"):
             if r.get(k):
                 r[k + "_spoken"] = fmt_time(datetime.fromisoformat(r[k]), L)

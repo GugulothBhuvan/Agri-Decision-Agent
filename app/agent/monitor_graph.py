@@ -134,6 +134,10 @@ def template_alert(d: dict, lang: str) -> str:
         return templates.harvest(facts, lang)
     if m == "calamity":
         return templates.calamity(facts, lang)
+    if m == "blight":
+        return templates.blight(facts, lang)
+    if m == "sowing":
+        return templates.sowing(facts, lang)
     if m == "claim":
         p = d["farm"]
         dl = datetime.fromisoformat(facts["deadline_at"])

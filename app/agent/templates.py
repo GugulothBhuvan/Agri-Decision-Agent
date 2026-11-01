@@ -44,6 +44,8 @@ FIXED = {
     "forecast_unavailable": {"bn": "এখন আবহাওয়ার পূর্বাভাস পাওয়া যাচ্ছে না, আর ছয় ঘণ্টার মধ্যের কোনো তথ্যও নেই। তাই এখন কোনো পরামর্শ দিচ্ছি না। একটু পরে আবার জিজ্ঞেস করুন।",
                              "en": "The weather forecast is unavailable right now and there is no fetch from the last six hours, so I won't advise yet. Please ask again a little later."},
     "need_profile": {"bn": "আগে আপনার জমির কথা একটু জেনে নিই।", "en": "First, let me learn a little about your field."},
+    "potato_stage": {"bn": "আলু গাছ বাড়লে ঝলসা রোগের সতর্কতা দিই, আর বোনার আগে বোনার দিন বলি। আপনার আলু কোন অবস্থায় আছে?",
+                     "en": "For potato I watch for late blight while it grows and suggest planting days before sowing. What stage is your potato at?"},
     "not_ready_stage": {"bn": "ধান পাকলে বা কাটা হলে কাটার নিরাপদ দিন বলব। ধান পাকলে আমাকে জানাবেন।",
                         "en": "I give safe cut days once the paddy is ripe or cut. Tell me when it's ripe."},
     "no_claim": {"bn": "এখন কোনো খোলা দাবি নেই। ধান কাটার পর ভারী বৃষ্টি হলে আমি দাবির চেকলিস্ট আর সময়সীমা খুলে দেব।",
@@ -130,6 +132,35 @@ def calamity(facts: dict, lang: str, with_source: bool = True) -> str:
         s = (f"No heavy rain expected in the next 24 hours (about {num(mm, L)} mm)."
              if L == "en" else
              f"আগামী ২৪ ঘণ্টায় ভারী বৃষ্টির আশঙ্কা নেই (প্রায় {num(mm, L)} মিমি)।")
+    return s + (_src(facts, L) if with_source else "")
+
+
+def blight(facts: dict, lang: str, with_source: bool = True) -> str:
+    L = "en" if lang == "en" else "bn"
+    a = facts.get("action")
+    if a == "spray_now":
+        s = ("Weather has favoured potato late blight on your field. Spray a protective fungicide now, as your block agriculture office advises."
+             if L == "en" else "আপনার জমিতে আলুর ঝলসা রোগের অনুকূল আবহাওয়া চলছে। ব্লক কৃষি অফিসের পরামর্শমতো এখনই প্রতিরোধক ছত্রাকনাশক স্প্রে করুন।")
+    elif a == "spray_by":
+        s = (f"Late blight risk is forecast from {fmt_day(facts['first_risk_day'], L)}. Spray a protective fungicide by {fmt_day(facts['spray_by'], L)}."
+             if L == "en" else
+             f"{fmt_day(facts['first_risk_day'], L)} থেকে ঝলসা রোগের ঝুঁকি। {fmt_day(facts['spray_by'], L)}-এর মধ্যে প্রতিরোধক ছত্রাকনাশক স্প্রে করুন।")
+    else:
+        s = ("No late blight risk this week. No spray needed now." if L == "en"
+             else "এই সপ্তাহে ঝলসা রোগের ঝুঁকি নেই। এখন স্প্রে দরকার নেই।")
+    return s + (_src(facts, L) if with_source else "")
+
+
+def sowing(facts: dict, lang: str, with_source: bool = True) -> str:
+    L = "en" if lang == "en" else "bn"
+    days = facts.get("plant_days") or []
+    if days:
+        s = (f"Good days to plant potato start {fmt_day(days[0], L)}." if L == "en"
+             else f"আলু বোনার ভালো সময় {fmt_day(days[0], L)} থেকে।")
+    else:
+        n = facts.get("horizon_days", 7)
+        s = (f"Not yet: no good planting day in the next {n} days. Nights are still too warm. I'll tell you when that changes."
+             if L == "en" else f"এখনও নয়: আগামী {num(n, L)} দিনে আলু বোনার ভালো দিন নেই, রাত এখনও গরম। বদলালে জানাব।")
     return s + (_src(facts, L) if with_source else "")
 
 

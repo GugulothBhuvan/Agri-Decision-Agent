@@ -12,6 +12,8 @@ INTENTS = {
     "harvest_window": "which days are safe to cut paddy, or whether to cut now",
     "calamity_check": "whether heavy rain or a storm is coming; whether to cover or move the paddy",
     "claim_status": "insurance claim after rain damage, the deadline, what to do for the claim",
+    "blight_check": "potato late blight (ঝলসা / ধসা রোগ), whether to spray fungicide",
+    "sowing_window": "when to plant or sow potato",
     "explain_decision": "why the agent gave its advice, where a number came from",
     "greeting": "hello, thanks, or small talk",
     "fertilizer_dose": "how much fertilizer, urea, DAP or potash to apply",

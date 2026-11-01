@@ -24,9 +24,19 @@
 <section class="card">
   <h2>{{ s['why.days'] }}</h2>
   <div class="scroll-x"><table>
+  {% if d.module == 'blight' %}
+    <tr><th></th><th>{{ s['why.rh_hours'] }}</th><th>{{ s['why.temp_hours'] }}</th><th>{{ s['why.rain2'] }}</th><th></th></tr>
+    {% for x in days %}<tr><td>{{ x.label }}</td><td class="mono">{{ x.rh_hours }}</td><td class="mono">{{ x.temp_hours }}</td><td class="mono">{{ x.rain_2day_mm }}</td>
+      <td>{% if x.meets %}<span class="chip amber">{{ s['why.risk'] }}</span>{% else %}<span class="chip green">{{ s['why.not_ok'] }}</span>{% endif %}</td></tr>{% endfor %}
+  {% elif d.module == 'sowing' %}
+    <tr><th></th><th>{{ s['why.tmax'] }}</th><th>{{ s['why.tmin'] }}</th><th>{{ s['why.rain'] }}</th><th></th></tr>
+    {% for x in days %}<tr><td>{{ x.label }}</td><td class="mono">{{ x.tmax_c }}</td><td class="mono">{{ x.tmin_c }}</td><td class="mono">{{ x.rain_mm }}</td>
+      <td>{% if x.ok %}<span class="chip green">{{ s['why.ok'] }}</span>{% else %}<span class="chip amber">{{ s['why.not_ok'] }}</span>{% endif %}</td></tr>{% endfor %}
+  {% else %}
     <tr><th></th><th>{{ s['why.rain'] }}</th><th>{{ s['why.chance'] }}</th><th></th></tr>
     {% for x in days %}<tr><td>{{ x.label }}</td><td class="mono">{{ x.rain_mm }}</td><td class="mono">{{ x.prob_max_pct }}%</td>
       <td>{% if x.dry %}<span class="chip green">{{ s['why.dry'] }}</span>{% else %}<span class="chip amber">{{ s['why.wet'] }}</span>{% endif %}</td></tr>{% endfor %}
+  {% endif %}
   </table></div>
 </section>
 {% endif %}

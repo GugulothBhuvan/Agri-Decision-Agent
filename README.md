@@ -34,7 +34,7 @@ flowchart LR
 | Path | What |
 | --- | --- |
 | `app/main.py` | Routes, sessions, scheduler, operator API |
-| `app/rules/` | Pure rule functions: `harvest.py`, `calamity.py`, `claim.py`, `tiers.py` |
+| `app/rules/` | Pure rule functions: `harvest.py`, `calamity.py`, `claim.py`, `blight.py`, `sowing.py`, `tiers.py` |
 | `app/agent/monitor_graph.py`, `convo_graph.py` | The two LangGraph graphs |
 | `app/agent/tools.py` | Tools shared by both graphs; decision recording, change detection, claim kits |
 | `app/agent/guardrail.py` | Number, source and no-action-claim checks |
@@ -51,7 +51,8 @@ Python 3.11+ and ffmpeg.
 ```bash
 python -m venv .venv && . .venv/bin/activate
 pip install -r requirements-dev.txt
-cp .env.example .env   # fill in keys; export them or use your process manager
+cp .env.example .env   # paste SARVAM_API_KEY and LLM_API_KEY
+python -m scripts.check_services   # one live call to each outside service
 uvicorn app.main:app --reload
 ```
 
@@ -103,5 +104,5 @@ pytest
 
 - Past-day rain is a model estimate, not a rain gauge; it is labelled "estimated" in the claim kit.
 - Days run midnight to midnight IST, not IMD's 08:30 to 08:30.
-- Blight watch and sowing window (P1) are not built.
+- Blight watch runs a station-validated rule on forecasts; the app says so on its Why page.
 - Hindi: detected by the router; replies in Hindi only when the LLM is on.

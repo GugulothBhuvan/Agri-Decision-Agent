@@ -112,5 +112,18 @@
   "ops.not_configured": "Set OPS_PASSCODE on the server to enable this view.",
   "ops.no_farms": "No farms yet. Create one from the home screen.",
   "back": "Back",
-  "why.forecast_what": "hourly rain forecast and 7-day model estimate"
+  "why.forecast_what": "hourly rain forecast and 7-day model estimate",
+  "card.blight_now": "Spray against late blight now",
+  "card.blight_by": "Spray against late blight by {day}",
+  "card.blight_skip": "No blight risk this week",
+  "card.sow_from": "Plant potato from {day}",
+  "card.sow_wait": "No good planting day in the next {n} days",
+  "why.tmax": "Max °C",
+  "why.tmin": "Min °C",
+  "why.rh_hours": "Humid hours",
+  "why.temp_hours": "Mild hours",
+  "why.rain2": "2-day rain (mm)",
+  "why.ok": "Suits",
+  "why.not_ok": "No",
+  "why.risk": "Risk"
 }

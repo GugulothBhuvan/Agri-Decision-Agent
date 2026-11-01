@@ -87,3 +87,30 @@ def test_hash_ignores_rain_amount_changes():
     b = calamity_check(S, rules(), "cut", datetime(2026, 10, 29, 7))
     assert a.data["next24_mm"] != b.data["next24_mm"]
     assert a.decision_hash() == b.decision_hash()
+
+
+def test_blight_skips_in_warm_late_october():
+    from app.rules.blight import blight_check
+    o = blight_check(S, rules(), datetime(2026, 10, 31, 18))
+    assert o.data["action"] == "skip" and not o.actionable
+    # Windows start on 29 Oct, the first day with 5 full days of hourly data.
+    assert o.data["days"][0]["date"] == "2026-10-29"
+
+
+def test_blight_raises_risk_when_cool_and_humid():
+    from app.rules.blight import blight_check
+    cfg = copy.deepcopy(rules())
+    r5 = cfg["blight_jhulsacast_wb"]["rule_5day"]
+    r5.update(temp_hours=60, rh_hours=30, consecutive_days=2)   # loosen to exercise the risk path
+    o = blight_check(S, cfg, datetime(2026, 10, 29, 9))
+    assert o.data["action"] in ("spray_now", "spray_by"), o.data
+    assert assign_tier(o, changed=True, now=datetime(2026, 10, 29, 9)) in ("amber", "yellow")
+
+
+def test_sowing_waits_for_cooler_nights():
+    from app.rules.sowing import sowing_window
+    o = sowing_window(S, rules(), datetime(2026, 10, 31, 18))
+    assert o.data["action"] == "wait"
+    assert [d["ok"] for d in o.data["days"]][-2:] == [True, True]   # 6 and 7 Nov: minimum under 21 C
+    o2 = sowing_window(S, rules(), datetime(2026, 11, 5, 9))
+    assert o2.data["days"][0]["date"] == "2026-11-05"

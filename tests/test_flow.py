@@ -214,3 +214,20 @@ def test_manual_location_pin_completes_profile(saved_forecast, monkeypatch):
         r = c.patch("/api/farm", json={"village": "Kovur", "crop": "paddy_aman", "stage": "cut", "area_bigha": 2,
                                        "cut_date": "2026-10-30", "insured": True, "lat": 14.49, "lon": 79.98}).json()
         assert r["missing"] == [] and r["profile"]["profile_confirmed"] and r["profile"]["lat"] == 14.49
+
+
+def test_potato_sowing_and_blight_flows(saved_forecast, geocoder):
+    c = client()
+    with c:
+        turn(c, "আলু বুনব, এখনও বোনা হয়নি, ২ বিঘা")
+        turn(c, "শালবনি, পশ্চিম মেদিনীপুর")
+        r = turn(c, "হ্যাঁ")
+        assert r["decision_ids"], r            # read-back confirmed -> sowing advice with source
+        assert "আলু" in r["reply_text"] and "সূত্র" in r["reply_text"]
+        d = c.get(f"/api/decisions/{r['decision_ids'][0]}").json()
+        assert d["module"] == "sowing" and d["rule_sources"][0]["url"].startswith("https://pmc.ncbi.nlm.nih.gov")
+        assert c.get(f"/why/{d['decision_id']}").status_code == 200
+        c.patch("/api/farm", json={"stage": "growing"})
+        r2 = turn(c, "ঝলসা রোগের জন্য স্প্রে করব?")
+        assert r2["decision_ids"] and r2["guardrail"]["first"]
+        assert c.get("/").status_code == 200

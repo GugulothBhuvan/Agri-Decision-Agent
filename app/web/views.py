@@ -29,6 +29,17 @@ def action_line(d: dict, lang: str) -> str:
         if a == "cover_heap":
             return t("card.cover_heap", lang)
         return t("card.no_heavy_rain", lang)
+    if m == "blight":
+        a = o.get("action")
+        if a == "spray_now":
+            return t("card.blight_now", lang)
+        if a == "spray_by":
+            return t("card.blight_by", lang, day=fmt_day(o["spray_by"], lang))
+        return t("card.blight_skip", lang)
+    if m == "sowing":
+        if o.get("plant_days"):
+            return t("card.sow_from", lang, day=fmt_day(o["plant_days"][0], lang))
+        return t("card.sow_wait", lang, n=num(o.get("horizon_days", 7), lang))
     if m == "claim":
         if o.get("action") == "claim_open":
             dl = datetime.fromisoformat(o["deadline_at"])
@@ -41,8 +52,9 @@ def decision_card(d: dict, lang: str) -> dict:
     other = "en" if lang == "bn" else "bn"
     reason = d["reason_en"] if lang == "en" else d["reason_bn"]
     sentences = [x.strip() for x in re.split(r"(?<=[।.])\s+", reason or "") if x.strip()]
-    # Harvest's first sentence repeats the action line; its second sentence is the rule.
-    pick = sentences[1] if d["module"] == "harvest" and len(sentences) > 1 else (sentences[0] if sentences else "")
+    # Harvest, blight and sowing open with the action line; their next sentence is the why.
+    pick = (sentences[1] if d["module"] in ("harvest", "blight", "sowing") and len(sentences) > 1
+            else (sentences[0] if sentences else ""))
     first_sentence = pick
     return {"id": d["decision_id"], "module": d["module"], "tier": d["tier"],
             "tier_label": t(f"tier.{d['tier']}", lang), "tier_label_2": t(f"tier.{d['tier']}", other),
@@ -58,7 +70,7 @@ def home_decision(farm_id: str) -> dict | None:
         return latest["claim"]
     if "calamity" in latest and latest["calamity"]["actionable"]:
         return latest["calamity"]
-    for m in ("harvest", "calamity", "claim"):
+    for m in ("harvest", "blight", "sowing", "calamity", "claim"):
         if m in latest:
             return latest[m]
     return None

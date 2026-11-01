@@ -8,9 +8,11 @@ from ..db import Claim, Decision, Farm, SourceFetch, session_scope, utcnow
 from ..i18n import IST
 from ..rules.base import Outcome
 from ..rules.calamity import calamity_check as rule_calamity
+from ..rules.blight import blight_check as rule_blight
 from ..rules.claim import claim_trigger as rule_claim
 from ..rules.harvest import harvest_window as rule_harvest
 from ..rules.series import Series
+from ..rules.sowing import sowing_window as rule_sowing
 from ..rules.tiers import assign_tier
 from ..sources import openmeteo
 from ..sources.geocode import geocode_village as nominatim_lookup
@@ -160,7 +162,7 @@ def evaluate(p: dict, fc: openmeteo.Forecast, now: datetime | None = None,
     series = Series(fc.raw)
     out: list[Outcome] = []
     stage, crop = p.get("stage"), p.get("crop")
-    want = set(modules or ["harvest", "calamity", "claim"])
+    want = set(modules or ["harvest", "calamity", "claim", "blight", "sowing"])
     if crop == "paddy_aman" and stage in ("ready", "cut"):
         if "harvest" in want:
             out.append(rule_harvest(series, cfg, now))
@@ -171,6 +173,10 @@ def evaluate(p: dict, fc: openmeteo.Forecast, now: datetime | None = None,
         cut = date.fromisoformat(p["cut_date"]) if p.get("cut_date") else None
         out.append(rule_claim(series, cfg, stage=stage, insured=p.get("insured"), cut_date=cut,
                               has_open_claim=oc, now=now))
+    if crop == "potato" and stage == "growing" and "blight" in want:
+        out.append(rule_blight(series, cfg, now))
+    if crop == "potato" and stage == "to_sow" and "sowing" in want:
+        out.append(rule_sowing(series, cfg, now))
     return out
 
 
@@ -245,6 +251,26 @@ async def harvest_window(farm_id: str, now: datetime | None = None) -> dict:
     return {"available": True, "applicable": True, **_facts(d)}
 
 
+async def _single(farm_id: str, module: str, now: datetime | None) -> dict:
+    p = get_farm(farm_id)
+    fc = await _farm_forecast(p)
+    if not fc.usable:
+        return _unavailable(fc)
+    outs = evaluate(p, fc, now, modules=[module])
+    if not outs:
+        return {"available": True, "applicable": False}
+    d = record_decision(p, outs[0], fc, "turn", now)
+    return {"available": True, "applicable": True, **_facts(d)}
+
+
+async def blight_check(farm_id: str, now: datetime | None = None) -> dict:
+    return await _single(farm_id, "blight", now)
+
+
+async def sowing_window(farm_id: str, now: datetime | None = None) -> dict:
+    return await _single(farm_id, "sowing", now)
+
+
 async def calamity_check(farm_id: str, now: datetime | None = None) -> dict:
     """Protect alert, plus the claim trigger for cut paddy (opens the kit if it fires)."""
     p = get_farm(farm_id)
@@ -317,7 +343,8 @@ def latest_decisions(farm_id: str) -> list[dict]:
                 tier = first.tier if first else d.tier
             out.append({"decision_id": d.id, "module": d.module, "tier": tier, "outcome": d.outcome,
                         "reason_en": d.reason_en, "reason_bn": d.reason_bn, "cached": d.cached,
-                        "created_at": _aware(d.created_at).isoformat(), "actionable": d.outcome.get("action") != "none"})
+                        "created_at": _aware(d.created_at).isoformat(),
+                        "actionable": d.outcome.get("action") not in ("none", "skip", "wait")})
         return out
 
 

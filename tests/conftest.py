@@ -5,6 +5,7 @@ import tempfile
 from pathlib import Path
 
 _tmp = tempfile.mkdtemp()
+os.environ["FS_SKIP_DOTENV"] = "1"
 os.environ["DATABASE_URL"] = f"sqlite:///{_tmp}/test.db"
 os.environ["ENABLE_SCHEDULER"] = "0"
 os.environ["OPS_PASSCODE"] = "test-pass"

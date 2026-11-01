@@ -10,6 +10,27 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent
 
 
+def _load_dotenv(path: Path = ROOT / ".env") -> None:
+    """Read KEY=value lines from .env into the environment. Real environment variables win."""
+    if not path.exists():
+        return
+    for line in path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, value = line.partition("=")
+        value = value.strip()
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
+            value = value[1:-1]
+        elif " #" in value:
+            value = value.split(" #", 1)[0].strip()
+        os.environ.setdefault(key.strip(), value)
+
+
+if os.environ.get("FS_SKIP_DOTENV") != "1":
+    _load_dotenv()
+
+
 def _env(name: str, default: str = "") -> str:
     return os.environ.get(name, default).strip()
 

@@ -34,4 +34,13 @@ blight_jhulsacast_wb:               # P1
   source: "Chakraborty et al., Potato Journal 42(1)"
   url: "https://epubs.icar.org.in/index.php/PotatoJ/article/view/47731"
 
+sowing_potato:                      # P1
+  max_temp_below_c: 35
+  min_temp_c: [2, 21]
+  source: "Bhardwaj et al. 2022, Characterizing the Potato Growing Regions in India (ICAR-CPRI), Life 12(10):1619"
+  url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC9605082/"
+  max_rain_mm: 2.5                  # team: keep seed tubers out of wet soil on planting day
+  consecutive_days: 3               # team: three suitable days in a row
+  horizon_days: 7
+
 freshness_hours: 6
