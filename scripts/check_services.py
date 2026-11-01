@@ -57,17 +57,17 @@ async def main() -> int:
 
     async def claude():
         if not llm.available():
-            return SKIP, "LLM_PROVIDER/LLM_API_KEY not set"
+            return SKIP, "LLM_API_KEY not set (LLM_PROVIDER=openrouter|anthropic)"
         r = await llm.complete_json(EXTRACT_SYSTEM, "Current profile: {}\nFarmer said: আমার ৩ বিঘা আমন ধান পেকে গেছে, শালবনি গ্রাম।",
                                     EXTRACT_SCHEMA)
         if not r:
             return FAIL, "no structured reply (see log above: key, model, network)"
-        return OK, f"crop={r.get('crop')} stage={r.get('stage')} area={r.get('area_bigha')} village={r.get('village')}"
+        return OK, f"{llm.provider()}:{llm.model()} crop={r.get('crop')} stage={r.get('stage')} area={r.get('area_bigha')} village={r.get('village')}"
 
     await check("Open-Meteo forecast", om())
     await check("Nominatim geocoding", nom())
     await check("Sarvam TTS + STT", speech())
-    await check("Claude extraction", claude())
+    await check("LLM extraction", claude())
     width = max(len(r[0]) for r in results)
     for name, status, note, ms in results:
         print(f"{status:4s}  {name:{width}s}  {ms:5d} ms  {note}")

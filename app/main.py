@@ -428,7 +428,7 @@ def sarvam_configured() -> bool:
 
 
 def llm_configured() -> bool:
-    return settings().llm_provider == "anthropic" and bool(settings().llm_api_key)
+    return settings().llm_provider in llm.PROVIDERS and bool(settings().llm_api_key)
 
 
 @app.get("/healthz")

@@ -5,7 +5,7 @@ SOURCES = {
     "openmeteo": "Open-Meteo forecast API",
     "nominatim": "Nominatim (OpenStreetMap)",
     "sarvam": "Sarvam speech",
-    "llm": "LLM",
+    "llm": "LLM (OpenRouter / Claude)",
 }
 
 _enabled: dict[str, bool] = {k: True for k in SOURCES}

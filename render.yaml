@@ -14,11 +14,11 @@ services:
       - key: SARVAM_SPEAKER
         value: ritu
       - key: LLM_PROVIDER
-        value: anthropic
+        value: openrouter
       - key: LLM_API_KEY
         sync: false
       - key: LLM_MODEL
-        value: claude-opus-5-5
+        value: google/gemma-4-31b-it:free
       - key: OPS_PASSCODE
         sync: false
       - key: SESSION_SECRET

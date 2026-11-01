@@ -26,7 +26,7 @@ flowchart LR
   T --> OM[(Open-Meteo forecast)]
   T --> NO[(Nominatim geocoding)]
   C --> SV[(Sarvam STT / TTS)]
-  C --> LLM[(Claude: extract, route, phrase)]
+  C --> LLM[(LLM via OpenRouter: extract, route, phrase)]
   M --> LLM
   S --> DB[(Postgres / SQLite<br/>farms, messages, source_fetches,<br/>decisions, alerts, claims, traces)]
 ```
@@ -39,7 +39,7 @@ flowchart LR
 | `app/agent/tools.py` | Tools shared by both graphs; decision recording, change detection, claim kits |
 | `app/agent/guardrail.py` | Number, source and no-action-claim checks |
 | `app/sources/` | Open-Meteo (fetch, 6-hour labelled cache, validation), Nominatim, the source-outage switch |
-| `app/llm/` | Claude client (structured outputs, 8 s timeout, server-side refusal fallback) and prompt contracts |
+| `app/llm/` | LLM client (OpenRouter or Claude; JSON replies checked against the schema; timeout) and prompt contracts |
 | `app/speech/sarvam.py` | ffmpeg webm→16 kHz WAV, Saaras v3 STT, Bulbul v3 TTS |
 | `app/web/` | Server-rendered pages, `app.js` (no build step), `strings/bn.json`, `strings/en.json` |
 | `rules.yaml` | Every threshold with its source; `team` marks our own design choices |
@@ -60,7 +60,7 @@ uvicorn app.main:app --reload
 | --- | --- |
 | `DATABASE_URL` | Postgres URL (Supabase); defaults to `sqlite:///local.db` |
 | `SARVAM_API_KEY`, `SARVAM_SPEAKER` | Speech to text and text to speech; speaker optional |
-| `LLM_PROVIDER`, `LLM_API_KEY`, `LLM_MODEL` | `anthropic` + key; model defaults to `claude-opus-5-5`. `none` = template replies only |
+| `LLM_PROVIDER`, `LLM_API_KEY`, `LLM_MODEL` | `openrouter` (default; free model `google/gemma-4-31b-it:free`) or `anthropic`. `none` = template replies only |
 | `OPS_PASSCODE` | Operator view at `/ops` |
 | `SESSION_SECRET` | Signs the farm session cookie |
 | `NOMINATIM_USER_AGENT` | Required by the Nominatim usage policy; include a contact |

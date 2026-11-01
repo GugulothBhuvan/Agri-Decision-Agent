@@ -40,10 +40,10 @@ class Settings:
         self.database_url = _env("DATABASE_URL") or f"sqlite:///{ROOT / 'local.db'}"
         self.sarvam_api_key = _env("SARVAM_API_KEY")
         self.sarvam_speaker = _env("SARVAM_SPEAKER")
-        self.llm_provider = (_env("LLM_PROVIDER") or ("anthropic" if _env("LLM_API_KEY") else "none")).lower()
+        self.llm_provider = (_env("LLM_PROVIDER") or ("openrouter" if _env("LLM_API_KEY") else "none")).lower()
         self.llm_api_key = _env("LLM_API_KEY")
         self.llm_model = _env("LLM_MODEL")
-        self.llm_timeout_s = float(_env("LLM_TIMEOUT_S", "8"))
+        self.llm_timeout_s = float(_env("LLM_TIMEOUT_S", "10"))
         self.ops_passcode = _env("OPS_PASSCODE")
         self.session_secret = _env("SESSION_SECRET") or "dev-only-insecure-secret"
         self.nominatim_user_agent = _env("NOMINATIM_USER_AGENT") or "fosol-sathi/0.1"
